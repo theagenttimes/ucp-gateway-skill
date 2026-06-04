@@ -25,6 +25,7 @@ Registry: `https://ucpgateway.theagenttimes.com/registry`
 - Create checkout only with `operator_confirmed: true` after showing the buyer/operator the cart summary.
 - Generate and reuse `client_action_id` once per explicit confirmed cart/checkout action, especially on retries.
 - Use Shopify-returned prices, availability, totals, cart IDs, checkout IDs, and `continue_url` as the source of truth.
+- Never invent or guess phone numbers, addresses, or buyer identity. Collect them from the buyer or omit the field.
 
 ## First-run setup
 
@@ -122,6 +123,7 @@ Do not look for or call `complete_checkout`, `get_order`, or arbitrary Shopify p
     - state/province;
     - postal code;
     - country ISO-2.
+    Phone should be in E.164 format like `+15555550100`. Country must be ISO-2 (`US`, not `USA`). If the buyer cannot or will not give a phone, omit the field rather than guessing.
 13. Ask final confirmation to create checkout.
 14. Generate `client_action_id` for that confirmed checkout action.
 15. Call `shopify_create_checkout` with `operator_confirmed: true`.
@@ -168,7 +170,7 @@ Create cart after confirmation:
     "context": {
       "address_country": "US",
       "address_region": "CO",
-      "postal_code": "80521"
+      "postal_code": "00000"
     }
   }
 }
@@ -186,14 +188,14 @@ Create checkout after final confirmation:
     "operator_confirmed": true,
     "client_action_id": "generated-uuid-for-this-confirmed-checkout-action",
     "buyer": {
-      "email": "buyer@example.com",
-      "phone": "+15551234567",
+      "email": "buyer.synthetic@example.test",
+      "phone": "+15555550100",
       "first_name": "Jane",
-      "last_name": "Smith",
-      "street_address": "123 Main Street",
-      "address_locality": "Fort Collins",
-      "address_region": "CO",
-      "postal_code": "80521",
+      "last_name": "Synthetic",
+      "street_address": "123 Test Street",
+      "address_locality": "Testville",
+      "address_region": "CA",
+      "postal_code": "00000",
       "address_country": "US"
     }
   }
@@ -207,4 +209,4 @@ Create checkout after final confirmation:
 - If `RATE_LIMITED`: wait for `retry_after_seconds`; do not generate a new `client_action_id` for the same confirmed mutation retry.
 - If `BUYER_INFO_REQUIRED`: collect buyer contact/shipping fields and retry checkout.
 - If `OPERATOR_CONFIRMATION_REQUIRED`: show the cart summary and ask the buyer/operator to confirm, then call checkout with `operator_confirmed: true`.
-- If Shopify returns `requires_escalation`, this is expected: hand the `continue_url` to the buyer.
+- If the response contains `warnings[].code` starting with `REQUIRES_ESCALATION_` (for example `REQUIRES_ESCALATION_DELIVERY_PHONE` or `REQUIRES_ESCALATION_EXTENSION_INTERACTION`), or the response `message` indicates Shopify needs the buyer on the hosted checkout page: hand `continue_url` to the buyer with the exact gateway message. Do not say the order is placed or paid. Do not retry checkout creation in a loop.

@@ -7,9 +7,10 @@ function usage() {
   node scripts/call-mcp.mjs <tool_name> '<json-arguments>'
 
 Examples:
-  node scripts/call-mcp.mjs list_ucp_profiles '{}'
   node scripts/call-mcp.mjs shopify_search_products '{"query":"trail running shoes","limit":5}'
+  node scripts/call-mcp.mjs shopify_get_product '{"product_id":"gid://shopify/Product/1111111111111","merchant_domain":"example-shop.myshopify.com"}'
 
+The full JSON-RPC response is printed, including result.structuredContent.next_step.
 Buyer fields use E.164 phone and ISO-2 country. Phone is optional.
 If ./ucpgateway/agent.json exists, agent_id is injected automatically for commerce tools when absent.`);
 }
@@ -24,7 +25,7 @@ const tool = process.argv[2];
 let args = process.argv[3] ? JSON.parse(process.argv[3]) : {};
 const agentPath = path.join(process.cwd(), "ucpgateway", "agent.json");
 
-if (!args.agent_id && !["register_ucp_profile", "list_ucp_profiles", "get_ucp_profile"].includes(tool)) {
+if (!args.agent_id && !["register_ucp_profile", "get_ucp_profile"].includes(tool)) {
   try {
     const agent = JSON.parse(await readFile(agentPath, "utf8"));
     args = { agent_id: agent.agent_id, ...args };

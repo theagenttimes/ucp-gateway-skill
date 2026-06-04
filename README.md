@@ -1,21 +1,8 @@
 # The Agent Times UCP Gateway Skill
 
-The Agent Times UCP Gateway — an infrastructure layer that enables open-source AI agents to participate in agentic commerce on Shopify through the Universal Commerce Protocol.
+OpenClaw skill and optional helper scripts for The Agent Times UCP Gateway: a hosted UCP profile registry and secure MCP gateway that lets open-source agents search Shopify products, create buyer-confirmed carts, and generate Shopify checkout handoff links.
 
-Our platform gives agents a hosted UCP profile registry, a secure MCP gateway, and token-tier access to Shopify commerce flows without requiring every agent to own a domain, GitHub account, or Shopify credentials.
-
-With this solution, agents can discover products, recommend options, build carts, validate them with the user, and generate Shopify checkout handoff links where the buyer completes payment safely on Shopify.
-
-The value is simple: we make AI commerce accessible to open-source agents while keeping payments secure, merchants protected, and user confirmation at the center of every transaction.
-
-The gateway lets open-source AI agents:
-
-- register a public Universal Commerce Protocol profile;
-- search Shopify products through The Agent Times token-tier proxy;
-- build Shopify carts;
-- create buyer-confirmed checkout handoff links.
-
-Payment is always completed by the buyer on Shopify checkout. Agents never receive Shopify secrets and must never collect card/CVV/bank/wallet credentials.
+Payment is always completed by the buyer on Shopify checkout. Agents never receive Shopify secrets and must never collect card/CVV/bank/wallet/payment credentials.
 
 ## Install
 
@@ -23,16 +10,74 @@ Payment is always completed by the buyer on Shopify checkout. Agents never recei
 clawhub install theagenttimes/ucp-gateway-skill
 ```
 
+The skill is usable from `SKILL.md` alone. Helper scripts are optional conveniences, not required.
+
+## Direct MCP endpoint
+
+```text
+https://ucpgateway.theagenttimes.com/mcp
+```
+
+Supported access patterns:
+
+- `POST /mcp` with JSON-RPC 2.0 for `initialize`, `tools/list`, `tools/call`, `resources/list`, `resources/templates/list`, and `prompts/list`.
+- `GET /mcp` for a markdown guide with direct JSON-RPC examples.
+- `GET /mcp` with `Accept: text/event-stream` for an SSE endpoint bootstrap.
+- `OPTIONS /mcp` for CORS/method metadata.
+- `DELETE /mcp` for 204 stateless cleanup.
+- `POST /messages` and `POST /mcp/messages` as optional direct JSON-RPC fallback routes for clients that probe message endpoints.
+
+Example JSON-RPC probe:
+
+```bash
+curl -s https://ucpgateway.theagenttimes.com/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+Every tool has an `inputSchema` and `outputSchema`. Every `tools/call` result includes `structuredContent.next_step` with recommended next actions and warnings.
+
+## Direct commerce flow
+
+1. Register a public UCP profile with `register_ucp_profile`, or load an existing active `agent_id`.
+2. Search products with `shopify_search_products`.
+3. Fetch detail/variant IDs with `shopify_get_product` when needed.
+4. Show Shopify-returned prices, availability, merchant domains, product URLs, and variant IDs.
+5. Ask confirmation before cart creation/update.
+6. Create or update cart.
+7. Show cart totals/messages.
+8. Collect buyer-provided checkout data; never invent PII.
+9. Ask final confirmation.
+10. Create checkout with `operator_confirmed: true`.
+11. Hand off `continue_url`; payment happens only on Shopify.
+
+## Core tools
+
+- `register_ucp_profile`
+- `get_ucp_profile`
+- `shopify_search_products`
+- `shopify_get_product`
+- `shopify_create_cart`
+- `shopify_get_cart`
+- `shopify_update_cart`
+- `shopify_cancel_cart`
+- `shopify_create_checkout`
+- `shopify_get_checkout`
+- `shopify_update_checkout`
+- `shopify_cancel_checkout`
+
+The gateway intentionally does **not** expose `complete_checkout`, `get_order`, arbitrary Shopify proxy tools, or an MCP profile-listing tool. Browse public profiles at `https://ucpgateway.theagenttimes.com/registry` or fetch a known profile with `get_ucp_profile`.
+
+## Optional helper scripts
+
 If using this repo directly:
 
 ```bash
 git clone https://github.com/theagenttimes/ucp-gateway-skill.git
 cd ucp-gateway-skill
 node scripts/init-ucpgateway.mjs
-node scripts/register-profile.mjs
+node scripts/register-profile.mjs --agent-name "Synthetic Shopping Agent"
 ```
-
-## First run
 
 The helper creates local identity files in your current working directory:
 
@@ -44,35 +89,7 @@ The helper creates local identity files in your current working directory:
   agent.json            # saved after registration
 ```
 
-Run:
-
-```bash
-node scripts/init-ucpgateway.mjs
-node scripts/register-profile.mjs --agent-name "My OpenClaw Shopping Agent"
-```
-
-`register-profile.mjs` calls the MCP tool `register_ucp_profile` at:
-
-```text
-https://ucpgateway.theagenttimes.com/mcp
-```
-
-It saves:
-
-```json
-{
-  "agent_id": "uuid",
-  "namespace": "openclaw",
-  "profile_url": "https://ucpgateway.theagenttimes.com/agents/openclaw/uuid.json",
-  "registry_url": "https://ucpgateway.theagenttimes.com/registry",
-  "gateway_mcp_url": "https://ucpgateway.theagenttimes.com/mcp",
-  "created_at": "..."
-}
-```
-
-## Calling tools from the helper
-
-`call-mcp.mjs` injects `agent_id` automatically from `./ucpgateway/agent.json` for commerce tools.
+`call-mcp.mjs` injects `agent_id` from `./ucpgateway/agent.json` for commerce tools when absent and prints the full JSON-RPC response, including `structuredContent.next_step`.
 
 ```bash
 node scripts/call-mcp.mjs shopify_search_products '{"query":"trail running shoes","limit":5}'
@@ -92,8 +109,6 @@ node scripts/call-mcp.mjs shopify_create_cart '{
 Create checkout after final confirmation and buyer data collection:
 
 ```bash
-# Phone must be E.164 (e.g. "+15555550100"); country must be ISO-2 (e.g. "US").
-# If buyer skips phone, omit the field entirely.
 node scripts/call-mcp.mjs shopify_create_checkout '{
   "merchant_domain":"example-running.myshopify.com",
   "cart_id":"gid://shopify/Cart/cart_abc123",
@@ -113,37 +128,28 @@ node scripts/call-mcp.mjs shopify_create_checkout '{
 }'
 ```
 
+## Field formats
+
+- `agent_id`: registered UCP Gateway UUID from `register_ucp_profile`.
+- `merchant_domain`: merchant host such as `outboundpower.com`; no scheme.
+- Countries: ISO-2 (`US`, not `USA`).
+- Currency: ISO 4217 (`USD`).
+- Phone: E.164 preferred (`+15555550100`); omit if unavailable.
+- Variant: Shopify ProductVariant GID returned by search/detail tools.
+- Quantity: integer 1–99.
+- `operator_confirmed`: true only after explicit cart review/confirmation.
+
 ## Safety rules
 
 - Never scrape merchant websites.
-- Never collect card number, CVV, bank credentials, wallet credentials, passwords, or payment one-time codes.
-- Never say the order is complete.
+- Never collect card number, CVV, bank credentials, wallet credentials, passwords, payment tokens, payment methods, or one-time payment codes.
+- Never say the order is complete or paid.
 - Always ask confirmation before cart mutations.
 - Always show cart summary and ask final confirmation before checkout.
-- Use `operator_confirmed: true` only after explicit buyer/operator confirmation.
-- Reuse `client_action_id` when retrying the same confirmed mutation.
-- Tell the user to open the returned Shopify `continue_url` and enter payment details there.
-- Treat any `warnings[].code` starting with `REQUIRES_ESCALATION_` as a buyer-handoff signal, not a completion signal.
+- Reuse `client_action_id` only when retrying the same confirmed mutation.
+- Treat `REQUIRES_ESCALATION_*` warnings as Shopify-hosted buyer handoff signals, not completion signals.
 
-## MCP tools
-
-- `register_ucp_profile`
-- `get_ucp_profile`
-- `list_ucp_profiles`
-- `shopify_search_products`
-- `shopify_get_product`
-- `shopify_create_cart`
-- `shopify_get_cart`
-- `shopify_update_cart`
-- `shopify_cancel_cart`
-- `shopify_create_checkout`
-- `shopify_get_checkout`
-- `shopify_update_checkout`
-- `shopify_cancel_checkout`
-
-The gateway intentionally does **not** expose `complete_checkout`, `get_order`, or arbitrary Shopify proxy tools.
-
-## Environment overrides
+## Environment overrides for optional scripts
 
 ```bash
 export UCP_GATEWAY_MCP_URL=https://ucpgateway.theagenttimes.com/mcp

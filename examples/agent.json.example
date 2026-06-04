@@ -1,0 +1,8 @@
+{
+  "agent_id": "00000000-0000-4000-8000-000000000000",
+  "namespace": "openclaw",
+  "profile_url": "https://ucpregistry.theagenttimes.com/agents/openclaw/00000000-0000-4000-8000-000000000000.json",
+  "registry_url": "https://ucpregistry.theagenttimes.com/registry",
+  "gateway_mcp_url": "https://ucpgateway.theagenttimes.com/mcp",
+  "created_at": "2026-06-04T00:00:00.000Z"
+}

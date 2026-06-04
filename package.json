@@ -1,0 +1,46 @@
+{
+  "name": "@theagenttimes/ucp-gateway-skill",
+  "version": "0.1.0",
+  "description": "OpenClaw skill and local scripts for The Agent Times Shopify UCP Gateway checkout handoff flow.",
+  "type": "module",
+  "private": false,
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "scripts/",
+    "examples/",
+    "LICENSE"
+  ],
+  "scripts": {
+    "init": "node scripts/init-ucpgateway.mjs",
+    "register": "node scripts/register-profile.mjs",
+    "call": "node scripts/call-mcp.mjs",
+    "check": "node scripts/init-ucpgateway.mjs --dry-run && node scripts/call-mcp.mjs --help"
+  },
+  "bin": {
+    "ucpgateway-init": "./scripts/init-ucpgateway.mjs",
+    "ucpgateway-register": "./scripts/register-profile.mjs",
+    "ucpgateway-call": "./scripts/call-mcp.mjs"
+  },
+  "keywords": [
+    "openclaw",
+    "clawhub",
+    "ucp",
+    "universal-commerce-protocol",
+    "shopify",
+    "mcp",
+    "agentic-commerce",
+    "checkout-handoff",
+    "the-agent-times"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theagenttimes/ucp-gateway-skill.git"
+  },
+  "homepage": "https://ucpregistry.theagenttimes.com",
+  "bugs": {
+    "url": "https://github.com/theagenttimes/ucp-gateway-skill/issues",
+    "email": "contact@theagenttimes.com"
+  }
+}

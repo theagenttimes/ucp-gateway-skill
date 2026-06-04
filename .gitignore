@@ -1,0 +1,7 @@
+node_modules
+.DS_Store
+.idea
+ucpgateway/private_key.jwk
+ucpgateway/agent.json
+ucpgateway/profile.draft.json
+ucpgateway/public_key.jwk

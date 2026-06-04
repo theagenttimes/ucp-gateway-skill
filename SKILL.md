@@ -9,7 +9,7 @@ metadata: { "openclaw": { "emoji": "🛒", "always": true } }
 Use this skill when the user wants to search, compare, or prepare checkout for products sold through Shopify merchants.
 
 Gateway MCP endpoint: `https://ucpgateway.theagenttimes.com/mcp`
-Registry: `https://ucpregistry.theagenttimes.com/registry`
+Registry: `https://ucpgateway.theagenttimes.com/registry`
 
 ## Non-negotiable rules
 
@@ -52,8 +52,8 @@ Expected `agent.json` shape:
 {
   "agent_id": "uuid",
   "namespace": "openclaw",
-  "profile_url": "https://ucpregistry.theagenttimes.com/agents/openclaw/uuid.json",
-  "registry_url": "https://ucpregistry.theagenttimes.com/registry",
+  "profile_url": "https://ucpgateway.theagenttimes.com/agents/openclaw/uuid.json",
+  "registry_url": "https://ucpgateway.theagenttimes.com/registry",
   "gateway_mcp_url": "https://ucpgateway.theagenttimes.com/mcp",
   "created_at": "2026-06-04T00:00:00.000Z"
 }

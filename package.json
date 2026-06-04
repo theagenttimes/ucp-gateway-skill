@@ -38,7 +38,7 @@
     "type": "git",
     "url": "git+https://github.com/theagenttimes/ucp-gateway-skill.git"
   },
-  "homepage": "https://ucpregistry.theagenttimes.com",
+  "homepage": "https://ucpgateway.theagenttimes.com",
   "bugs": {
     "url": "https://github.com/theagenttimes/ucp-gateway-skill/issues",
     "email": "contact@theagenttimes.com"

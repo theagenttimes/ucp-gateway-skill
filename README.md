@@ -57,8 +57,8 @@ It saves:
 {
   "agent_id": "uuid",
   "namespace": "openclaw",
-  "profile_url": "https://ucpregistry.theagenttimes.com/agents/openclaw/uuid.json",
-  "registry_url": "https://ucpregistry.theagenttimes.com/registry",
+  "profile_url": "https://ucpgateway.theagenttimes.com/agents/openclaw/uuid.json",
+  "registry_url": "https://ucpgateway.theagenttimes.com/registry",
   "gateway_mcp_url": "https://ucpgateway.theagenttimes.com/mcp",
   "created_at": "..."
 }

@@ -79,26 +79,29 @@ node scripts/call-mcp.mjs shopify_create_cart '{
   "merchant_domain":"example-running.myshopify.com",
   "client_action_id":"00000000-0000-4000-8000-000000000001",
   "line_items":[{"item":{"id":"gid://shopify/ProductVariant/12345678901"},"quantity":1}],
-  "context":{"address_country":"US","address_region":"CO","postal_code":"80521"}
+  "context":{"address_country":"US","address_region":"CA","postal_code":"00000"}
 }'
 ```
 
 Create checkout after final confirmation and buyer data collection:
 
 ```bash
+# Phone must be E.164 (e.g. "+15555550100"); country must be ISO-2 (e.g. "US").
+# If buyer skips phone, omit the field entirely.
 node scripts/call-mcp.mjs shopify_create_checkout '{
   "merchant_domain":"example-running.myshopify.com",
   "cart_id":"gid://shopify/Cart/cart_abc123",
   "operator_confirmed":true,
   "client_action_id":"00000000-0000-4000-8000-000000000002",
   "buyer":{
-    "email":"buyer@example.com",
+    "email":"buyer.synthetic@example.test",
+    "phone":"+15555550100",
     "first_name":"Jane",
-    "last_name":"Smith",
-    "street_address":"123 Main Street",
-    "address_locality":"Fort Collins",
-    "address_region":"CO",
-    "postal_code":"80521",
+    "last_name":"Synthetic",
+    "street_address":"123 Test Street",
+    "address_locality":"Testville",
+    "address_region":"CA",
+    "postal_code":"00000",
     "address_country":"US"
   }
 }'
@@ -114,6 +117,7 @@ node scripts/call-mcp.mjs shopify_create_checkout '{
 - Use `operator_confirmed: true` only after explicit buyer/operator confirmation.
 - Reuse `client_action_id` when retrying the same confirmed mutation.
 - Tell the user to open the returned Shopify `continue_url` and enter payment details there.
+- Treat any `warnings[].code` starting with `REQUIRES_ESCALATION_` as a buyer-handoff signal, not a completion signal.
 
 ## MCP tools
 

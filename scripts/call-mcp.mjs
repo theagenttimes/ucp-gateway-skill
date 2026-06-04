@@ -10,6 +10,7 @@ Examples:
   node scripts/call-mcp.mjs list_ucp_profiles '{}'
   node scripts/call-mcp.mjs shopify_search_products '{"query":"trail running shoes","limit":5}'
 
+Buyer fields use E.164 phone and ISO-2 country. Phone is optional.
 If ./ucpgateway/agent.json exists, agent_id is injected automatically for commerce tools when absent.`);
 }
 

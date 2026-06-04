@@ -1,6 +1,12 @@
 # The Agent Times UCP Gateway Skill
 
-OpenClaw/ClawHub skill and local scripts for The Agent Times Shopify UCP Gateway.
+The Agent Times UCP Gateway — an infrastructure layer that enables open-source AI agents to participate in agentic commerce on Shopify through the Universal Commerce Protocol.
+
+Our platform gives agents a hosted UCP profile registry, a secure MCP gateway, and token-tier access to Shopify commerce flows without requiring every agent to own a domain, GitHub account, or Shopify credentials.
+
+With this solution, agents can discover products, recommend options, build carts, validate them with the user, and generate Shopify checkout handoff links where the buyer completes payment safely on Shopify.
+
+The value is simple: we make AI commerce accessible to open-source agents while keeping payments secure, merchants protected, and user confirmation at the center of every transaction.
 
 The gateway lets open-source AI agents:
 

@@ -1,8 +1,8 @@
 # The Agent Times UCP Gateway Skill
 
-OpenClaw skill and optional helper scripts for The Agent Times UCP Gateway: a hosted UCP profile registry and secure MCP gateway that lets open-source agents search Shopify products, create buyer-confirmed carts, and generate Shopify checkout handoff links.
+OpenClaw skill and optional helper scripts for The Agent Times UCP Gateway: a hosted UCP profile registry and secure MCP gateway that lets open-source agents search products, create buyer-confirmed carts, and generate merchant checkout handoff links for UCP-capable Shopping providers.
 
-Payment is always completed by the buyer on Shopify checkout. Agents never receive Shopify secrets and must never collect card/CVV/bank/wallet/payment credentials.
+Payment is always completed by the buyer on the merchant-hosted checkout. Agents never receive provider secrets and must never collect card/CVV/bank/wallet/payment credentials.
 
 ## Install
 
@@ -39,34 +39,34 @@ Every tool has an `inputSchema` and `outputSchema`. Every `tools/call` result in
 
 ## Direct commerce flow
 
-1. Register a public UCP profile with `register_ucp_profile`, or load an existing active `agent_id`.
-2. Search products with `shopify_search_products`.
-3. Fetch detail/variant IDs with `shopify_get_product` when needed.
-4. Show Shopify-returned prices, availability, merchant domains, product URLs, and variant IDs.
+1. Register a public UCP profile with `register_ucp_profile`, or load an existing active `agent_id`. The registry publishes a hosted profile and returns `agent_id` + `profile_url` for Shopping tasks.
+2. Search products with `shopping_search_products`.
+3. Fetch detail/variant IDs with `shopping_get_product` when needed.
+4. Show provider-returned prices, availability, merchant domains, product URLs, and variant IDs.
 5. Ask confirmation before cart creation/update.
 6. Create or update cart.
 7. Show cart totals/messages.
 8. Collect buyer-provided checkout data; never invent PII.
 9. Ask final confirmation.
 10. Create checkout with `operator_confirmed: true`.
-11. Hand off `continue_url`; payment happens only on Shopify.
+11. Hand off `continue_url`; payment happens only on the merchant-hosted checkout.
 
 ## Core tools
 
 - `register_ucp_profile`
 - `get_ucp_profile`
-- `shopify_search_products`
-- `shopify_get_product`
-- `shopify_create_cart`
-- `shopify_get_cart`
-- `shopify_update_cart`
-- `shopify_cancel_cart`
-- `shopify_create_checkout`
-- `shopify_get_checkout`
-- `shopify_update_checkout`
-- `shopify_cancel_checkout`
+- `shopping_search_products`
+- `shopping_get_product`
+- `shopping_create_cart`
+- `shopping_get_cart`
+- `shopping_update_cart`
+- `shopping_cancel_cart`
+- `shopping_create_checkout`
+- `shopping_get_checkout`
+- `shopping_update_checkout`
+- `shopping_cancel_checkout`
 
-The gateway intentionally does **not** expose `complete_checkout`, `get_order`, arbitrary Shopify proxy tools, or an MCP profile-listing tool. Browse public profiles at `https://ucpgateway.theagenttimes.com/registry` or fetch a known profile with `get_ucp_profile`.
+The gateway intentionally does **not** expose `complete_checkout`, `get_order`, arbitrary upstream commerce proxy tools, or an MCP profile-listing tool. Browse public profiles at `https://ucpgateway.theagenttimes.com/registry` or fetch a known profile with `get_ucp_profile`.
 
 ## Optional helper scripts
 
@@ -89,16 +89,16 @@ The helper creates local identity files in your current working directory:
   agent.json            # saved after registration
 ```
 
-`call-mcp.mjs` injects `agent_id` from `./ucpgateway/agent.json` for commerce tools when absent and prints the full JSON-RPC response, including `structuredContent.next_step`.
+`call-mcp.mjs` injects `agent_id` from `./ucpgateway/agent.json` for Shopping tools when absent and prints the full JSON-RPC response, including `structuredContent.next_step`.
 
 ```bash
-node scripts/call-mcp.mjs shopify_search_products '{"query":"trail running shoes","limit":5}'
+node scripts/call-mcp.mjs shopping_search_products '{"query":"trail running shoes","limit":5}'
 ```
 
 Create a cart after the buyer confirms selected variants:
 
 ```bash
-node scripts/call-mcp.mjs shopify_create_cart '{
+node scripts/call-mcp.mjs shopping_create_cart '{
   "merchant_domain":"example-running.myshopify.com",
   "client_action_id":"00000000-0000-4000-8000-000000000001",
   "line_items":[{"item":{"id":"gid://shopify/ProductVariant/12345678901"},"quantity":1}],
@@ -109,7 +109,7 @@ node scripts/call-mcp.mjs shopify_create_cart '{
 Create checkout after final confirmation and buyer data collection:
 
 ```bash
-node scripts/call-mcp.mjs shopify_create_checkout '{
+node scripts/call-mcp.mjs shopping_create_checkout '{
   "merchant_domain":"example-running.myshopify.com",
   "cart_id":"gid://shopify/Cart/cart_abc123",
   "operator_confirmed":true,
@@ -135,7 +135,7 @@ node scripts/call-mcp.mjs shopify_create_checkout '{
 - Countries: ISO-2 (`US`, not `USA`).
 - Currency: ISO 4217 (`USD`).
 - Phone: E.164 preferred (`+15555550100`); omit if unavailable.
-- Variant: Shopify ProductVariant GID returned by search/detail tools.
+- Variant: provider variant ID returned by search/detail tools (the current adapter may return Shopify ProductVariant GIDs).
 - Quantity: integer 1–99.
 - `operator_confirmed`: true only after explicit cart review/confirmation.
 
@@ -147,12 +147,12 @@ node scripts/call-mcp.mjs shopify_create_checkout '{
 - Always ask confirmation before cart mutations.
 - Always show cart summary and ask final confirmation before checkout.
 - Reuse `client_action_id` only when retrying the same confirmed mutation.
-- Treat `REQUIRES_ESCALATION_*` warnings as Shopify-hosted buyer handoff signals, not completion signals.
+- Treat `REQUIRES_ESCALATION_*` warnings as merchant-hosted buyer handoff signals, not completion signals.
 
 ## Environment overrides for optional scripts
 
 ```bash
 export UCP_GATEWAY_MCP_URL=https://ucpgateway.theagenttimes.com/mcp
 export UCP_NAMESPACE=openclaw
-export UCP_AGENT_NAME="OpenClaw Shopify Shopping Agent"
+export UCP_AGENT_NAME="OpenClaw UCP Shopping Agent"
 ```

@@ -7,12 +7,12 @@ function usage() {
   node scripts/call-mcp.mjs <tool_name> '<json-arguments>'
 
 Examples:
-  node scripts/call-mcp.mjs shopify_search_products '{"query":"trail running shoes","limit":5}'
-  node scripts/call-mcp.mjs shopify_get_product '{"product_id":"gid://shopify/Product/1111111111111","merchant_domain":"example-shop.myshopify.com"}'
+  node scripts/call-mcp.mjs shopping_search_products '{"query":"trail running shoes","limit":5}'
+  node scripts/call-mcp.mjs shopping_get_product '{"product_id":"gid://shopify/Product/1111111111111","merchant_domain":"example-shop.myshopify.com"}'
 
 The full JSON-RPC response is printed, including result.structuredContent.next_step.
 Buyer fields use E.164 phone and ISO-2 country. Phone is optional.
-If ./ucpgateway/agent.json exists, agent_id is injected automatically for commerce tools when absent.`);
+If ./ucpgateway/agent.json exists, agent_id is injected automatically for Shopping tools when absent.`);
 }
 
 if (process.argv.includes("--help") || process.argv.length < 3) {

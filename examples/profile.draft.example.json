@@ -21,8 +21,8 @@
     }
   ],
   "metadata": {
-    "name": "OpenClaw Shopify Shopping Agent",
-    "description": "Open-source agent using The Agent Times UCP Gateway for Shopify commerce handoff.",
+    "name": "OpenClaw UCP Shopping Agent",
+    "description": "Open-source agent using The Agent Times UCP Gateway for UCP Shopping handoff.",
     "runtime": "openclaw",
     "skill": "ucp-gateway-skill"
   }

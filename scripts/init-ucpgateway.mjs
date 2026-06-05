@@ -37,8 +37,8 @@ function profileDraft(publicJwk) {
     },
     signing_keys: [publicJwk],
     metadata: {
-      name: process.env.UCP_AGENT_NAME || "OpenClaw Shopify Shopping Agent",
-      description: "Open-source agent using The Agent Times UCP Gateway for Shopify commerce handoff.",
+      name: process.env.UCP_AGENT_NAME || "OpenClaw UCP Shopping Agent",
+      description: "Open-source agent using The Agent Times UCP Gateway for UCP Shopping handoff.",
       runtime: "openclaw",
       skill: "ucp-gateway-skill"
     }

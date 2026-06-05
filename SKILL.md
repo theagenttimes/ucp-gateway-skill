@@ -1,12 +1,12 @@
 ---
 name: ucp-gateway-skill
-description: "Search Shopify products, prepare carts, and create buyer-confirmed checkout handoff links through The Agent Times UCP Gateway."
+description: "Search products, prepare carts, and create buyer-confirmed checkout handoff links through The Agent Times UCP Gateway."
 metadata: { "openclaw": { "emoji": "🛒", "always": true } }
 ---
 
-# The Agent Times Shopify UCP Gateway Skill
+# The Agent Times UCP Gateway Skill
 
-Use this skill when the user wants to search, compare, cart, or prepare checkout for products sold through Shopify merchants.
+Use this skill when the user wants to search, compare, cart, or prepare checkout for products from UCP-capable merchants or Shopping providers.
 
 - MCP endpoint: `https://ucpgateway.theagenttimes.com/mcp`
 - Registry: `https://ucpgateway.theagenttimes.com/registry`
@@ -20,18 +20,18 @@ Helper scripts in this package are optional conveniences. You can use the gatewa
 - Never scrape merchant websites. Use the UCP Gateway MCP tools.
 - Never collect card number, CVV, bank credentials, wallet credentials, passwords, one-time payment codes, payment tokens, or payment method data.
 - Never tell the user an order is complete or paid.
-- The user must pay on the Shopify checkout page opened from `continue_url`.
-- Every Shopify commerce tool call must include a registered `agent_id`.
+- The user must pay on the merchant checkout page opened from `continue_url`.
+- Every Shopping tool call must include a registered `agent_id`.
 - Ask explicit confirmation before creating or updating a cart.
 - Show cart items/totals/messages and ask explicit final confirmation before creating checkout.
 - Use `operator_confirmed: true` only after that confirmation.
 - Generate a fresh `client_action_id` UUID once per confirmed state-changing action; reuse it only for retrying the same action.
-- Use Shopify-returned prices, availability, totals, cart IDs, checkout IDs, variant IDs, product URLs, and `continue_url` as source of truth.
+- Use provider-returned prices, availability, totals, cart IDs, checkout IDs, variant IDs, product URLs, and `continue_url` as source of truth.
 - Never invent or guess phone numbers, addresses, email, or buyer identity. Ask the buyer or omit optional fields.
 
 ## Agent identity
 
-If you do not already have an active `agent_id`, call `register_ucp_profile`. Save the returned `agent_id` and `profile_url` locally, for example in `./ucpgateway/agent.json`.
+If you do not already have an active `agent_id`, call `register_ucp_profile`. Save the returned `agent_id` and `profile_url` locally, for example in `./ucpgateway/agent.json`. The hosted UCP profile is published in the registry immediately and that `agent_id` can be used for UCP Shopping tasks now.
 
 If you create local signing keys, keep private keys local only. Public profile JSON may contain public JWK fields (`kty`, `crv`, `x`, `y`, `kid`, `alg`, `use`) but must never contain private JWK material such as `d`, `p`, `q`, `dp`, `dq`, `qi`, or `k`.
 
@@ -49,7 +49,7 @@ Minimal saved identity shape:
 
 ## Direct JSON-RPC examples
 
-All examples use synthetic data. Replace `agent_id`, product IDs, merchant domains, and buyer fields only with real values returned by Shopify or supplied by the buyer.
+All examples use synthetic data. Replace `agent_id`, product IDs, merchant domains, and buyer fields only with real values returned by the gateway/provider or supplied by the buyer.
 
 ### initialize
 
@@ -86,7 +86,7 @@ Read each tool's `inputSchema` and `outputSchema`. The gateway also supports `re
     "arguments": {
       "namespace": "openclaw",
       "agent_name": "Synthetic Shopping Agent",
-      "description": "Synthetic agent using The Agent Times UCP Gateway for Shopify handoff tests.",
+      "description": "Synthetic agent using The Agent Times UCP Gateway for UCP Shopping handoff tests.",
       "profile_json": {
         "ucp": {
           "version": "2026-04-08",
@@ -104,13 +104,13 @@ Read each tool's `inputSchema` and `outputSchema`. The gateway also supports `re
         "metadata": { "name": "Synthetic Shopping Agent", "runtime": "openclaw" }
       },
       "skill_name": "ucp-gateway-skill",
-      "skill_version": "0.1.0"
+      "skill_version": "0.1.1"
     }
   }
 }
 ```
 
-### shopify_search_products
+### shopping_search_products
 
 ```json
 {
@@ -118,7 +118,7 @@ Read each tool's `inputSchema` and `outputSchema`. The gateway also supports `re
   "id": 4,
   "method": "tools/call",
   "params": {
-    "name": "shopify_search_products",
+    "name": "shopping_search_products",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "query": "portable battery powered air conditioner",
@@ -139,9 +139,9 @@ Read each tool's `inputSchema` and `outputSchema`. The gateway also supports `re
 }
 ```
 
-Show 3–5 Shopify-returned options with title, merchant domain, price, availability, product URL, and variant IDs/options. Do not invent prices or availability.
+Show 3–5 provider-returned options with title, merchant domain, price, availability, product URL, and variant IDs/options. Do not invent prices or availability.
 
-### shopify_get_product
+### shopping_get_product
 
 ```json
 {
@@ -149,7 +149,7 @@ Show 3–5 Shopify-returned options with title, merchant domain, price, availabi
   "id": 5,
   "method": "tools/call",
   "params": {
-    "name": "shopify_get_product",
+    "name": "shopping_get_product",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "product_id": "gid://shopify/Product/1111111111111",
@@ -162,7 +162,7 @@ Show 3–5 Shopify-returned options with title, merchant domain, price, availabi
 
 Use this before cart creation when you need variant resolution, updated availability, or detail.
 
-### shopify_create_cart
+### shopping_create_cart
 
 Call only after the buyer selected variants/quantities and confirmed adding them to cart.
 
@@ -172,7 +172,7 @@ Call only after the buyer selected variants/quantities and confirmed adding them
   "id": 6,
   "method": "tools/call",
   "params": {
-    "name": "shopify_create_cart",
+    "name": "shopping_create_cart",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "merchant_domain": "example-shop.myshopify.com",
@@ -186,7 +186,7 @@ Call only after the buyer selected variants/quantities and confirmed adding them
 }
 ```
 
-### shopify_create_checkout
+### shopping_create_checkout
 
 Call only after showing the cart summary/totals/messages and receiving final confirmation.
 
@@ -196,7 +196,7 @@ Call only after showing the cart summary/totals/messages and receiving final con
   "id": 7,
   "method": "tools/call",
   "params": {
-    "name": "shopify_create_checkout",
+    "name": "shopping_create_checkout",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "merchant_domain": "example-shop.myshopify.com",
@@ -219,21 +219,21 @@ Call only after showing the cart summary/totals/messages and receiving final con
 }
 ```
 
-Return the Shopify `continue_url` and say: “Open this Shopify checkout link and enter your payment method there. I cannot see or process your payment details.”
+Return the merchant `continue_url` and say: “Open this merchant checkout link and enter your payment method there. I cannot see or process your payment details.”
 
 ## Shopping flow
 
 1. Register profile or load an existing `agent_id`.
-2. Search products with `shopify_search_products`.
-3. Fetch product/variant details with `shopify_get_product` if needed.
-4. Show Shopify-returned options/prices/availability to the buyer.
+2. Search products with `shopping_search_products`.
+3. Fetch product/variant details with `shopping_get_product` if needed.
+4. Show provider-returned options/prices/availability to the buyer.
 5. Ask the buyer to choose product/variant and quantity.
-6. Ask confirmation before `shopify_create_cart` or `shopify_update_cart`.
+6. Ask confirmation before `shopping_create_cart` or `shopping_update_cart`.
 7. Show cart summary/totals/messages.
 8. Collect checkout buyer data only from the buyer: first name, last name, email, shipping street, city, state/region, postal code, ISO-2 country, optional phone.
 9. Ask final confirmation before checkout.
-10. Call `shopify_create_checkout` with `operator_confirmed: true`.
-11. Hand off `continue_url`; payment is Shopify-hosted only.
+10. Call `shopping_create_checkout` with `operator_confirmed: true`.
+11. Hand off `continue_url`; payment is merchant-hosted only.
 
 ## Field formats
 
@@ -243,13 +243,13 @@ Return the Shopify `continue_url` and say: “Open this Shopify checkout link an
 - `query`: natural-language product search.
 - `context.address_country`, `filters.ships_to.country`, buyer `address_country`: ISO-2 (`US`, not `USA`).
 - `currency`: ISO 4217 (`USD`, `EUR`, etc.).
-- `line_items[].item.id`: Shopify ProductVariant GID returned by search/detail tools.
+- `line_items[].item.id`: provider variant ID returned by search/detail tools (the current adapter may return Shopify ProductVariant GIDs).
 - `line_items[].quantity`: integer 1–99.
 - `buyer.email`: buyer-supplied email.
 - `buyer.phone`: E.164 preferred (`+15555550100`); omit if unavailable.
 - `operator_confirmed`: true only after explicit buyer/operator checkout confirmation.
 - `append_utm`: whether to append The Agent Times handoff UTM parameters.
-- `checkout`: full checkout replacement payload for `shopify_update_checkout`; use sparingly and never include payment fields.
+- `checkout`: full checkout replacement payload for `shopping_update_checkout`; use sparingly and never include payment fields.
 
 ## Response handling and next_step
 
@@ -267,9 +267,9 @@ Common recoveries:
 - `RATE_LIMITED`: wait for `retry_after_seconds`; reuse the same `client_action_id` only for the same confirmed mutation retry.
 - `BUYER_INFO_REQUIRED`: collect buyer-provided checkout fields; never invent PII.
 - `OPERATOR_CONFIRMATION_REQUIRED`: show cart summary and ask for confirmation before retrying with `operator_confirmed: true`.
-- Payment-data rejection: remove payment fields. Buyer enters payment only on Shopify.
+- Payment-data rejection: remove payment fields. Buyer enters payment only on the merchant checkout.
 
-If checkout response status, message, or `warnings[].code` indicates `requires_escalation` or starts with `REQUIRES_ESCALATION_`, hand `continue_url` to the buyer and stop retrying checkout creation. The buyer may need to add a phone number, complete an extension interaction, or finish another Shopify-hosted step. This is not order/payment completion.
+If checkout response status, message, or `warnings[].code` indicates `requires_escalation` or starts with `REQUIRES_ESCALATION_`, hand `continue_url` to the buyer and stop retrying checkout creation. The buyer may need to add a phone number, complete an extension interaction, or finish another merchant-hosted step. This is not order/payment completion.
 
 ## Optional local helper scripts
 
@@ -278,7 +278,7 @@ The package includes optional scripts:
 ```bash
 node scripts/init-ucpgateway.mjs
 node scripts/register-profile.mjs --agent-name "Synthetic Shopping Agent"
-node scripts/call-mcp.mjs shopify_search_products '{"query":"trail running shoes","limit":5}'
+node scripts/call-mcp.mjs shopping_search_products '{"query":"trail running shoes","limit":5}'
 ```
 
 Do not depend on scripts being available. Direct JSON-RPC above is the source of truth.

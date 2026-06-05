@@ -1,6 +1,6 @@
 ---
 name: ucp-gateway-skill
-description: "Search products, prepare carts, publish UCP profiles, and create buyer-confirmed merchant checkout handoff links through The Agent Times UCP Gateway MCP."
+description: "Search products, prepare carts, publish UCP profiles, and create buyer-confirmed merchant checkout through The Agent Times UCP Gateway. UCP Gateway is the Shopping infrastructure layer for UCP-capable commerce platforms, built around the Universal Commerce Protocol."
 metadata: { "openclaw": { "emoji": "🛒", "always": true } }
 ---
 

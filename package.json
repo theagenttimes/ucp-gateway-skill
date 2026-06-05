@@ -1,6 +1,6 @@
 {
   "name": "@theagenttimes/ucp-gateway-skill",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "OpenClaw skill and local scripts for The Agent Times UCP Gateway Shopping checkout handoff flow.",
   "type": "module",
   "private": false,

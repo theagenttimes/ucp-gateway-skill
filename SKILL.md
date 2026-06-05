@@ -110,7 +110,7 @@ Read each tool's `inputSchema` and `outputSchema`. The gateway also supports `re
 }
 ```
 
-### shopping_search_products
+### shopping_product_search
 
 ```json
 {
@@ -118,7 +118,7 @@ Read each tool's `inputSchema` and `outputSchema`. The gateway also supports `re
   "id": 4,
   "method": "tools/call",
   "params": {
-    "name": "shopping_search_products",
+    "name": "shopping_product_search",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "query": "portable battery powered air conditioner",
@@ -141,7 +141,7 @@ Read each tool's `inputSchema` and `outputSchema`. The gateway also supports `re
 
 Show 3–5 provider-returned options with title, merchant domain, price, availability, product URL, and variant IDs/options. Do not invent prices or availability.
 
-### shopping_get_product
+### shopping_product_get
 
 ```json
 {
@@ -149,7 +149,7 @@ Show 3–5 provider-returned options with title, merchant domain, price, availab
   "id": 5,
   "method": "tools/call",
   "params": {
-    "name": "shopping_get_product",
+    "name": "shopping_product_get",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "product_id": "gid://shopify/Product/1111111111111",
@@ -162,7 +162,7 @@ Show 3–5 provider-returned options with title, merchant domain, price, availab
 
 Use this before cart creation when you need variant resolution, updated availability, or detail.
 
-### shopping_create_cart
+### shopping_cart_create
 
 Call only after the buyer selected variants/quantities and confirmed adding them to cart.
 
@@ -172,7 +172,7 @@ Call only after the buyer selected variants/quantities and confirmed adding them
   "id": 6,
   "method": "tools/call",
   "params": {
-    "name": "shopping_create_cart",
+    "name": "shopping_cart_create",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "merchant_domain": "example-shop.myshopify.com",
@@ -186,7 +186,7 @@ Call only after the buyer selected variants/quantities and confirmed adding them
 }
 ```
 
-### shopping_create_checkout
+### shopping_checkout_create
 
 Call only after showing the cart summary/totals/messages and receiving final confirmation.
 
@@ -196,7 +196,7 @@ Call only after showing the cart summary/totals/messages and receiving final con
   "id": 7,
   "method": "tools/call",
   "params": {
-    "name": "shopping_create_checkout",
+    "name": "shopping_checkout_create",
     "arguments": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
       "merchant_domain": "example-shop.myshopify.com",
@@ -224,15 +224,15 @@ Return the merchant `continue_url` and say: “Open this merchant checkout link 
 ## Shopping flow
 
 1. Register profile or load an existing `agent_id`.
-2. Search products with `shopping_search_products`.
-3. Fetch product/variant details with `shopping_get_product` if needed.
+2. Search products with `shopping_product_search`.
+3. Fetch product/variant details with `shopping_product_get` if needed.
 4. Show provider-returned options/prices/availability to the buyer.
 5. Ask the buyer to choose product/variant and quantity.
-6. Ask confirmation before `shopping_create_cart` or `shopping_update_cart`.
+6. Ask confirmation before `shopping_cart_create` or `shopping_cart_update`.
 7. Show cart summary/totals/messages.
 8. Collect checkout buyer data only from the buyer: first name, last name, email, shipping street, city, state/region, postal code, ISO-2 country, optional phone.
 9. Ask final confirmation before checkout.
-10. Call `shopping_create_checkout` with `operator_confirmed: true`.
+10. Call `shopping_checkout_create` with `operator_confirmed: true`.
 11. Hand off `continue_url`; payment is merchant-hosted only.
 
 ## Field formats
@@ -249,7 +249,7 @@ Return the merchant `continue_url` and say: “Open this merchant checkout link 
 - `buyer.phone`: E.164 preferred (`+15555550100`); omit if unavailable.
 - `operator_confirmed`: true only after explicit buyer/operator checkout confirmation.
 - `append_utm`: whether to append The Agent Times handoff UTM parameters.
-- `checkout`: full checkout replacement payload for `shopping_update_checkout`; use sparingly and never include payment fields.
+- `checkout`: full checkout replacement payload for `shopping_checkout_update`; use sparingly and never include payment fields.
 
 ## Response handling and next_step
 
@@ -278,7 +278,7 @@ The package includes optional scripts:
 ```bash
 node scripts/init-ucpgateway.mjs
 node scripts/register-profile.mjs --agent-name "Synthetic Shopping Agent"
-node scripts/call-mcp.mjs shopping_search_products '{"query":"trail running shoes","limit":5}'
+node scripts/call-mcp.mjs shopping_product_search '{"query":"trail running shoes","limit":5}'
 ```
 
 Do not depend on scripts being available. Direct JSON-RPC above is the source of truth.

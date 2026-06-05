@@ -15,7 +15,7 @@ function argValue(name, fallback) {
 const namespace = argValue("--namespace", process.env.UCP_NAMESPACE || "openclaw");
 const agentName = argValue("--agent-name", process.env.UCP_AGENT_NAME || "OpenClaw UCP Shopping Agent");
 const description = argValue("--description", process.env.UCP_AGENT_DESCRIPTION || "Open-source agent using The Agent Times UCP Gateway for UCP Shopping handoff.");
-const skillVersion = argValue("--skill-version", process.env.npm_package_version || "0.1.1");
+const skillVersion = argValue("--skill-version", process.env.npm_package_version || "0.1.3");
 
 const profileJson = JSON.parse(await readFile(draftPath, "utf8"));
 const request = {

@@ -4,5 +4,41 @@
   "profile_url": "https://ucpgateway.theagenttimes.com/agents/openclaw/00000000-0000-4000-8000-000000000000.json",
   "registry_url": "https://ucpgateway.theagenttimes.com/registry",
   "gateway_mcp_url": "https://ucpgateway.theagenttimes.com/mcp",
+  "profile_json": {
+    "ucp": {
+      "version": "2026-04-08",
+      "supported_versions": {
+        "2026-04-08": "https://ucpgateway.theagenttimes.com/agents/openclaw/00000000-0000-4000-8000-000000000000.json"
+      },
+      "capabilities": {
+        "dev.ucp.shopping.catalog.search": [{ "version": "2026-04-08" }],
+        "dev.ucp.shopping.catalog.lookup": [{ "version": "2026-04-08" }],
+        "dev.ucp.shopping.catalog": [{ "version": "2026-04-08" }],
+        "dev.ucp.shopping.cart": [{ "version": "2026-04-08" }],
+        "dev.ucp.shopping.checkout": [{ "version": "2026-04-08" }]
+      },
+      "payment_handlers": {}
+    },
+    "signing_keys": [
+      {
+        "kid": "local-key-1",
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "<base64url>",
+        "y": "<base64url>",
+        "alg": "ES256",
+        "use": "sig"
+      }
+    ],
+    "metadata": {
+      "agent_id": "00000000-0000-4000-8000-000000000000",
+      "profile_url": "https://ucpgateway.theagenttimes.com/agents/openclaw/00000000-0000-4000-8000-000000000000.json",
+      "registry": "https://ucpgateway.theagenttimes.com",
+      "gateway": "https://ucpgateway.theagenttimes.com/mcp",
+      "name": "OpenClaw UCP Shopping Agent",
+      "runtime": "openclaw",
+      "skill": "ucp-gateway-skill"
+    }
+  },
   "created_at": "2026-06-04T00:00:00.000Z"
 }

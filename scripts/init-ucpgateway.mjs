@@ -6,8 +6,9 @@ import { webcrypto } from "node:crypto";
 
 const UCP_VERSION = "2026-04-08";
 const cwd = process.cwd();
-const dir = path.join(cwd, "ucpgateway");
+const dir = path.join(cwd, ".ucpgateway");
 const dryRun = process.argv.includes("--dry-run");
+const legacyDraft = process.argv.includes("--legacy-draft");
 
 async function exists(file) {
   try { await access(file, constants.F_OK); return true; } catch { return false; }
@@ -30,6 +31,7 @@ function profileDraft(publicJwk) {
       capabilities: {
         "dev.ucp.shopping.catalog.search": [{ version: UCP_VERSION }],
         "dev.ucp.shopping.catalog.lookup": [{ version: UCP_VERSION }],
+        "dev.ucp.shopping.catalog": [{ version: UCP_VERSION }],
         "dev.ucp.shopping.cart": [{ version: UCP_VERSION }],
         "dev.ucp.shopping.checkout": [{ version: UCP_VERSION }]
       },
@@ -46,7 +48,7 @@ function profileDraft(publicJwk) {
 }
 
 if (dryRun) {
-  console.log("Would create ./ucpgateway/{private_key.jwk,public_key.jwk,profile.draft.json}. No files changed.");
+  console.log("Would create ./.ucpgateway/{private_key.jwk,public_key.jwk}. No files changed. profile.draft.json is legacy-only; pass --legacy-draft to create it.");
   process.exit(0);
 }
 
@@ -65,9 +67,9 @@ if (await exists(publicPath)) {
   await writeFile(publicPath, JSON.stringify(publicJwk, null, 2), { mode: 0o644 });
 }
 
-if (!(await exists(draftPath))) {
+if (legacyDraft && !(await exists(draftPath))) {
   await writeFile(draftPath, JSON.stringify(profileDraft(publicJwk), null, 2));
 }
 
 console.log(`Initialized ${path.relative(cwd, dir)}`);
-console.log("Private key stays local and must never be uploaded. Next: node scripts/register-profile.mjs");
+console.log("Private key stays local and must never be uploaded. Next: node scripts/register-profile.mjs (sends public_key_jwk; gateway builds the UCP profile).");

@@ -30,8 +30,8 @@ Registry: `https://ucpgateway.theagenttimes.com/registry`
 
 1. GET `/mcp` for the guide, or POST JSON-RPC `initialize`.
 2. Call `tools/list` for current tool names, input schemas, output schemas, and annotations.
-3. Call `resources/list`, then `resources/read` `ucp://gateway/agent-guide`.
-4. Call `prompts/list`, then `prompts/get` `ucp-shopping-flow` or `ucp-operator-handoff` when you need operator-ready flow instructions.
+3. Call `resources/list`, then `resources/read` `ucp://gateway/profile-registration` for first-time registration or `ucp://gateway/agent-guide` for the full guide.
+4. Call `prompts/list`, then `prompts/get` `ucp-profile-registration`, `ucp-shopping-flow`, or `ucp-operator-handoff` when you need operator-ready flow instructions.
 5. Register/load `agent_id`, then use Shopping tools through `tools/call`.
 
 ## Protocol notes
@@ -49,6 +49,14 @@ Registry: `https://ucpgateway.theagenttimes.com/registry`
 - `shopping_checkout_create`, `shopping_checkout_get`, `shopping_checkout_update`, `shopping_checkout_cancel`
 
 Use `tools/list` for schemas instead of relying on remembered arguments.
+
+## Profile registration notes
+
+- Generate or reuse a local ECDSA P-256 key pair. Keep `private_key.jwk` local only. Never pass private key material to MCP.
+- Call `register_ucp_profile` with `agent_name`, `public_key_jwk`, optional `namespace`, optional `description`, optional public `metadata`, `skill_name: "ucp-gateway-skill"`.
+- The gateway creates the canonical UCP profile, default Shopping capabilities, `payment_handlers: {}`, public `signing_keys`, metadata, `agent_id`, and `profile_url`.
+- Save returned `agent_id`, `namespace`, `profile_url`, `registry_url`, and generated `profile_json` to `./.ucpgateway/agent.json` or equivalent local state.
+- If you intentionally use legacy `profile_json`, exact capability keys are required: `dev.ucp.shopping.catalog.search`, `dev.ucp.shopping.catalog.lookup`, `dev.ucp.shopping.catalog`, `dev.ucp.shopping.cart`, `dev.ucp.shopping.checkout`.
 
 ## Shopping flow
 
@@ -84,6 +92,8 @@ After every `tools/call`, read `result.structuredContent.next_step`:
 Common recoveries:
 
 - `AGENT_ID_REQUIRED` / `AGENT_NOT_REGISTERED`: register or load an active `agent_id`.
+- `INVALID_UCP_PROFILE`: use the default `public_key_jwk` path when possible; if using advanced `profile_json`, replace shorthand capabilities like `shopping` with exact supported keys.
+- `INVALID_PUBLIC_KEY`: send only an EC P-256 `public_key_jwk`; keep `./.ucpgateway/private_key.jwk` local.
 - `INVALID_TOOL_ARGUMENTS`: fix arguments using `tools/list` schemas.
 - `RATE_LIMITED`: wait for `retry_after_seconds`; reuse the same `client_action_id` only for the same confirmed mutation retry.
 - `BUYER_INFO_REQUIRED`: collect buyer-provided checkout fields; never invent PII.

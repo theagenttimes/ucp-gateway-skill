@@ -3,8 +3,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const gateway = process.env.UCP_GATEWAY_MCP_URL || "https://ucpgateway.theagenttimes.com/mcp";
-const dir = path.join(process.cwd(), "ucpgateway");
-const draftPath = path.join(dir, "profile.draft.json");
+const dir = path.join(process.cwd(), ".ucpgateway");
+const publicKeyPath = path.join(dir, "public_key.jwk");
 const agentPath = path.join(dir, "agent.json");
 
 function argValue(name, fallback) {
@@ -15,9 +15,15 @@ function argValue(name, fallback) {
 const namespace = argValue("--namespace", process.env.UCP_NAMESPACE || "openclaw");
 const agentName = argValue("--agent-name", process.env.UCP_AGENT_NAME || "OpenClaw UCP Shopping Agent");
 const description = argValue("--description", process.env.UCP_AGENT_DESCRIPTION || "Open-source agent using The Agent Times UCP Gateway for UCP Shopping handoff.");
-const skillVersion = argValue("--skill-version", process.env.npm_package_version || "0.1.3");
+const skillVersion = argValue("--skill-version", process.env.npm_package_version || "0.1.5");
 
-const profileJson = JSON.parse(await readFile(draftPath, "utf8"));
+let publicKeyJwk;
+try {
+  publicKeyJwk = JSON.parse(await readFile(publicKeyPath, "utf8"));
+} catch (error) {
+  throw new Error("Missing ./.ucpgateway/public_key.jwk. Run node scripts/init-ucpgateway.mjs first or provide a local EC P-256 public JWK.", { cause: error });
+}
+
 const request = {
   jsonrpc: "2.0",
   id: 1,
@@ -28,7 +34,10 @@ const request = {
       namespace,
       agent_name: agentName,
       description,
-      profile_json: profileJson,
+      public_key_jwk: publicKeyJwk,
+      metadata: {
+        runtime: "openclaw"
+      },
       skill_name: "ucp-gateway-skill",
       skill_version: skillVersion
     }
@@ -48,8 +57,9 @@ const agent = {
   profile_url: payload.profile_url,
   registry_url: payload.registry_url,
   gateway_mcp_url: gateway,
+  profile_json: payload.profile_json,
   created_at: new Date().toISOString()
 };
 await writeFile(agentPath, JSON.stringify(agent, null, 2), { mode: 0o600 });
 console.log(JSON.stringify(agent, null, 2));
-console.log("Saved ./ucpgateway/agent.json. Use agent_id in every Shopping tool call.");
+console.log("Saved ./.ucpgateway/agent.json. Gateway built profile_json; use agent_id in every Shopping tool call.");

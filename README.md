@@ -114,12 +114,27 @@ Do not paste large tool examples into your system prompt. Fetch schemas from `to
 
 ## Profile publishing and `agent_id`
 
-Every Shopping tool requires an active `agent_id`. If an agent does not have one, register a public UCP profile:
+Every Shopping tool requires an active `agent_id`. If an agent does not have one, use the simple registration path. The agent sends a public key and public agent data; the gateway builds the canonical UCP profile and default Shopping capabilities.
 
-- Keep private signing keys local.
-- Public profile JSON may include public signing keys and UCP capabilities.
-- Public profile JSON must never include private JWK fields such as `d`, `p`, `q`, `dp`, `dq`, or `qi`.
-- Save the returned `agent_id`, `profile_url`, `namespace`, and gateway URL locally.
+- Generate or reuse an ECDSA P-256 key pair.
+- Keep `./.ucpgateway/private_key.jwk` local (`0600` when possible); the private key is never passed to MCP.
+- Send the public key object as `public_key_jwk` to `register_ucp_profile` with `agent_name`, optional `namespace`, optional `description`, optional public `metadata`, `skill_name`, and `skill_version`.
+- The gateway returns `agent_id`, `profile_url`, `registry_url`, `profile`, and `profile_json`.
+- Save the returned `agent_id`, `profile_url`, `namespace`, registry URL, gateway URL, and generated `profile_json` to `./.ucpgateway/agent.json` or equivalent local state.
+
+Do not build full profile JSON for normal registration. `profile_json` is an advanced/legacy path only; do not send both `public_key_jwk` and `profile_json`.
+
+Legacy `profile_json` capability keys are exact strings:
+
+```text
+dev.ucp.shopping.catalog.search
+dev.ucp.shopping.catalog.lookup
+dev.ucp.shopping.catalog
+dev.ucp.shopping.cart
+dev.ucp.shopping.checkout
+```
+
+`shopping` and `dev.ucp.shopping` are invalid shorthand in legacy `profile_json`. The default `public_key_jwk` path avoids capability maps entirely.
 
 The hosted profile is visible in the registry and can be used immediately for Shopping MCP calls.
 
@@ -163,14 +178,16 @@ node scripts/register-profile.mjs --agent-name "OpenClaw UCP Shopping Agent"
 node scripts/call-mcp.mjs shopping_product_search '{"query":"trail running shoes","limit":5}'
 ```
 
-Local helper state is written under `./ucpgateway/`:
+Local helper state is written under `./.ucpgateway/`:
 
 ```text
 private_key.jwk       local only; never upload
-public_key.jwk        public key material
-profile.draft.json    editable public UCP profile draft
-agent.json            saved agent_id/profile_url after registration
+public_key.jwk        public key material sent as public_key_jwk
+profile.draft.json    optional legacy full-profile draft, not needed for normal registration
+agent.json            saved agent_id/profile_url/profile_json after registration
 ```
+
+`register-profile.mjs` sends `public_key_jwk` to `register_ucp_profile`; the gateway builds the profile and saves returned metadata to `./.ucpgateway/agent.json`.
 
 Environment overrides:
 
@@ -184,4 +201,4 @@ The scripts print raw JSON-RPC responses so you can inspect `result.next_step` a
 
 ## Version
 
-Current package version: `0.1.3`.
+Current package version: `0.1.5`.

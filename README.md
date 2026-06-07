@@ -1,36 +1,17 @@
 # The Agent Times UCP Gateway Skill
 
-Open agents can recommend products, but safe commerce needs more than a model and a browser. The Agent Times UCP Gateway gives agents a hosted UCP identity registry and a Shopping MCP gateway for product search, buyer-confirmed carts, and merchant-hosted checkout handoff — without scraping, exposing provider secrets, or touching payment credentials.
+Open agents can recommend products, but safe commerce needs structured identity, confirmation, and handoff. The Agent Times UCP Gateway gives agents a hosted UCP identity registry and a provider-neutral Shopping MCP gateway for product search, buyer-confirmed carts, and merchant-hosted checkout links — without scraping, provider secrets, or payment handling.
 
-## The problem
+`SKILL.md` is the authoritative runtime guide for agents. This README is human onboarding and package documentation.
 
-Agentic commerce breaks down at the point where intent becomes action:
+## What agents can do
 
-- Agents need a stable public identity that merchants and operators can inspect.
-- Product and cart actions need structured provider tools, not brittle scraping.
-- Checkout needs human confirmation and merchant-hosted payment, not hidden automation.
-- Operators need clear safety boundaries for buyer PII, payment data, and final handoff.
-
-UCP Gateway exists to make that path practical for open agents and UCP-capable commerce providers.
-
-## The solution
-
-The gateway combines two pieces of infrastructure:
-
-1. **Hosted UCP profile registry** — agents publish a public UCP profile and receive a stable `agent_id` plus `profile_url`.
-2. **Shopping MCP gateway** — agents call discovery-first MCP methods, then use provider-neutral Shopping tools to search, cart, and create checkout handoff links.
-
-Payment remains on the merchant site. The gateway does not complete payment, collect cards, or claim an order is finished.
-
-## What agents can do today
-
-- Publish a hosted UCP profile with `register_ucp_profile`.
-- Fetch a known hosted profile with `get_ucp_profile`.
-- Search products with `shopping_product_search`.
-- Get product/variant detail with `shopping_product_get`.
+- Publish or reuse a hosted UCP profile with `register_ucp_profile` and use the returned `agent_id`.
+- Fetch a hosted profile with `get_ucp_profile`.
+- Search and inspect products with `shopping_product_search` and `shopping_product_get`.
 - Create, refresh, update, or cancel buyer-confirmed carts.
-- Create, refresh, update, or cancel checkout handoff sessions.
-- Read `next_step` guidance after every response to know what to ask, show, or call next.
+- Create, refresh, update, or cancel merchant checkout handoff sessions.
+- Read `next_step` guidance after every MCP response.
 
 Core tool names:
 
@@ -49,13 +30,7 @@ shopping_checkout_update
 shopping_checkout_cancel
 ```
 
-`tools/list` is the authoritative source for input schemas, output schemas, annotations, and descriptions.
-
-## Why it matters
-
-For agents and operators, UCP Gateway turns shopping from a fragile browser task into a structured, inspectable MCP flow. For merchants and commerce platforms, it keeps identity, confirmation, and payment boundaries explicit while allowing agents to participate in discovery and checkout handoff. For investors and ecosystem builders, it is a concrete bridge between open-source agents and real commerce infrastructure.
-
-The first hosted implementation is intentionally narrow: profile publishing, product discovery, cart actions, and checkout handoff. The architecture is provider-neutral so additional UCP-capable Shopping providers can be added without changing the agent-facing flow.
+`tools/list` is the authoritative source for schemas, annotations, and descriptions.
 
 ## Install
 
@@ -63,7 +38,7 @@ The first hosted implementation is intentionally narrow: profile publishing, pro
 clawhub install theagenttimes/ucp-gateway-skill
 ```
 
-The skill is usable from `SKILL.md` alone. Helper scripts are included for local identity setup and manual MCP calls, but they are optional.
+The skill is usable from `SKILL.md` alone. Helper scripts are optional deterministic utilities for local key setup, registration, and MCP discovery/calls.
 
 ## MCP endpoint
 
@@ -71,60 +46,20 @@ The skill is usable from `SKILL.md` alone. Helper scripts are included for local
 https://ucpgateway.theagenttimes.com/mcp
 ```
 
-Supported access patterns:
+Use JSON-RPC 2.0 `POST /mcp` for `initialize`, `tools/list`, `tools/call`, `resources/list/read`, and `prompts/list/get`. GET `/mcp` returns a markdown guide/SSE bootstrap; `/messages` and `/mcp/messages` may exist as POST fallbacks.
 
-- `POST /mcp` — primary JSON-RPC 2.0 transport.
-- `GET /mcp` — self-serve markdown guide.
-- `GET /mcp` with `Accept: text/event-stream` — stateless SSE bootstrap that points clients back to POST.
-- `OPTIONS /mcp` — CORS, method, transport, and session metadata.
-- `DELETE /mcp` — JSON cleanup/no-op for stateless Streamable HTTP compatibility.
-- `POST /messages` and `POST /mcp/messages` — JSON-RPC fallback paths for probing clients.
-
-The hosted gateway is stateless. It accepts/echoes `mcp-session-id` for compatibility, but agents should not assume durable server-side MCP sessions.
-
-## Discovery-first quick start
-
-Start by asking the MCP endpoint what it supports:
-
-```bash
-curl -s https://ucpgateway.theagenttimes.com/mcp \
-  -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize"}'
-```
-
-Then discover schemas and instructions:
-
-```bash
-curl -s https://ucpgateway.theagenttimes.com/mcp \
-  -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
-```
-
-Recommended sequence for generic agents:
-
-1. `initialize`
-2. `tools/list`
-3. `resources/list`
-4. `resources/read` for `ucp://gateway/agent-guide`
-5. `prompts/list`
-6. `prompts/get` for `ucp-shopping-flow` or `ucp-operator-handoff`
-7. `tools/call` with the selected tool and schema-valid arguments
-
-Do not paste large tool examples into your system prompt. Fetch schemas from `tools/list` and instructions from `resources/read` / `prompts/get`.
+Agents should not load every resource at startup. Branch by state: register if no `agent_id`, search if shopping intent is clear, and read focused resources/prompts only when needed.
 
 ## Profile publishing and `agent_id`
 
-Every Shopping tool requires an active `agent_id`. If an agent does not have one, use the simple registration path. The agent sends a public key and public agent data; the gateway builds the canonical UCP profile and default Shopping capabilities.
+Every Shopping tool requires an active `agent_id`. Default registration is SKILL.md-friendly: send `agent_name` + `public_key_jwk`; the backend builds the canonical UCP profile and default Shopping capabilities.
 
-- Generate or reuse an ECDSA P-256 key pair.
-- Keep `./.ucpgateway/private_key.jwk` local (`0600` when possible); the private key is never passed to MCP.
-- Send the public key object as `public_key_jwk` to `register_ucp_profile` with `agent_name`, optional `namespace`, optional `description`, optional public `metadata`, `skill_name`, and `skill_version`.
-- The gateway returns `agent_id`, `profile_url`, `registry_url`, `profile`, and `profile_json`.
-- Save the returned `agent_id`, `profile_url`, `namespace`, registry URL, gateway URL, and generated `profile_json` to `./.ucpgateway/agent.json` or equivalent local state.
+- Keep `./.ucpgateway/private_key.jwk` local (`0600` when possible); never pass private key material to MCP.
+- Send `./.ucpgateway/public_key.jwk` as `public_key_jwk` with optional namespace/description/public metadata/skill version.
+- Save returned `agent_id`, `namespace`, `profile_url`, `registry_url`, `gateway_mcp_url`, `profile_json`, `created`, `existing_profile`, `message`, and local `saved_at` to `./.ucpgateway/agent.json`.
+- Same namespace + public key registration is idempotent: `existing_profile: true`, `created: false`, same `agent_id`, hosted profile not modified.
 
-Do not build full profile JSON for normal registration. `profile_json` is an advanced/legacy path only; do not send both `public_key_jwk` and `profile_json`.
-
-Legacy `profile_json` capability keys are exact strings:
+Do not build full `profile_json` for normal registration. Advanced legacy `profile_json` must use exact keys only:
 
 ```text
 dev.ucp.shopping.catalog.search
@@ -134,31 +69,26 @@ dev.ucp.shopping.cart
 dev.ucp.shopping.checkout
 ```
 
-`shopping` and `dev.ucp.shopping` are invalid shorthand in legacy `profile_json`. The default `public_key_jwk` path avoids capability maps entirely.
-
-The hosted profile is visible in the registry and can be used immediately for Shopping MCP calls.
+`shopping` and `dev.ucp.shopping` are invalid shorthand.
 
 ## Safe Shopping flow
 
-1. Load or register `agent_id`.
-2. Search products with `shopping_product_search`.
-3. Fetch detail with `shopping_product_get` when variant, merchant, or availability details are needed.
-4. Show provider-returned options: title, merchant domain, price, availability, product URL, variant IDs/options, messages, and warnings.
-5. Ask the buyer/operator to choose exact variant(s) and quantity.
-6. Create or update cart only after explicit confirmation.
+1. Load/register `agent_id`.
+2. Search with `shopping_product_search`.
+3. Fetch detail with `shopping_product_get` when variant, merchant, or availability detail is needed.
+4. Show provider-returned options only; do not invent prices, availability, URLs, variants, merchant domains, or warnings.
+5. Ask buyer/operator to choose variant(s) and quantity.
+6. Create/update/cancel cart only after explicit confirmation.
 7. Show cart items, totals, messages, warnings, and any `continue_url`.
-8. Collect checkout buyer data only from the buyer. Use ISO-2 countries and E.164 phone when supplied.
-9. Ask final confirmation before checkout.
-10. Call `shopping_checkout_create` with `operator_confirmed: true`.
-11. Hand off the merchant `continue_url`; the buyer enters payment on the merchant site.
+8. Collect checkout contact/shipping data only from the buyer.
+9. Ask final confirmation, then call `shopping_checkout_create` with `operator_confirmed: true`.
+10. Hand off merchant `continue_url`; the buyer enters payment on the merchant site.
 
 ## Safety boundaries
 
-- No scraping.
-- No hidden purchases.
-- No card number, CVV, bank credential, wallet credential, payment token, payment method, password, or one-time payment code in tool calls.
+- No scraping, hidden purchasing, or payment completion claims.
+- No card, CVV, bank, wallet, payment token, payment method, password, or one-time payment code fields.
 - No invented buyer PII.
-- No claim that an order is paid, placed, complete, or guaranteed.
 - `operator_confirmed: true` is checkout-handoff authorization, not payment authorization.
 - `REQUIRES_ESCALATION_*` or `requires_escalation` means the buyer must continue on the merchant-hosted page.
 
@@ -168,11 +98,10 @@ Suggested checkout handoff copy:
 
 ## Optional helper scripts
 
-If using this repository directly:
-
 ```bash
 git clone https://github.com/theagenttimes/ucp-gateway-skill.git
 cd ucp-gateway-skill
+npm run check
 node scripts/init-ucpgateway.mjs
 node scripts/register-profile.mjs --agent-name "OpenClaw UCP Shopping Agent"
 node scripts/call-mcp.mjs shopping_product_search '{"query":"trail running shoes","limit":5}'
@@ -187,7 +116,37 @@ profile.draft.json    optional legacy full-profile draft, not needed for normal 
 agent.json            saved agent_id/profile_url/profile_json after registration
 ```
 
-`register-profile.mjs` sends `public_key_jwk` to `register_ucp_profile`; the gateway builds the profile and saves returned metadata to `./.ucpgateway/agent.json`.
+### `init-ucpgateway.mjs`
+
+- Both key files present: reuse the local keypair and verify public coordinates match the private key.
+- Both missing: generate `private_key.jwk` and `public_key.jwk`.
+- Private-only: derive `public_key.jwk` from the existing private key; never overwrite the private key.
+- Public-only: fail unless `--public-only` is passed for agents that manage the private key elsewhere.
+- `--force-rotate`: intentionally overwrite both key files with a fresh pair.
+- `--dry-run`: non-mutating preview; `--legacy-draft` creates `profile.draft.json` only for advanced legacy profile work.
+
+### `register-profile.mjs`
+
+Sends `public_key_jwk` to `register_ucp_profile` and writes `agent.json` with `saved_at` plus `created`, `existing_profile`, and `message`. When the gateway reuses an existing profile and local `agent.json` already has the same `agent_id`, local custom fields are preserved while flags and `saved_at` refresh.
+
+### `call-mcp.mjs`
+
+Discovery modes do not require `agent.json`:
+
+```bash
+node scripts/call-mcp.mjs --initialize
+node scripts/call-mcp.mjs --tools
+node scripts/call-mcp.mjs --resources
+node scripts/call-mcp.mjs --resource ucp://gateway/skill-runtime-guide
+node scripts/call-mcp.mjs --prompts
+node scripts/call-mcp.mjs --prompt ucp-skill-runtime-guide --prompt-arg shopping_goal='trail running shoes'
+```
+
+Tool-call mode injects `agent_id` from `./.ucpgateway/agent.json` for Shopping tools when omitted:
+
+```bash
+node scripts/call-mcp.mjs shopping_product_search '{"query":"trail running shoes","limit":5}'
+```
 
 Environment overrides:
 
@@ -197,8 +156,6 @@ export UCP_NAMESPACE=openclaw
 export UCP_AGENT_NAME="OpenClaw UCP Shopping Agent"
 ```
 
-The scripts print raw JSON-RPC responses so you can inspect `result.next_step` and `result.structuredContent.next_step`.
-
 ## Version
 
-Current package version: `0.1.5`.
+Current package version: `0.2.0`.

@@ -40,5 +40,8 @@
       "skill": "ucp-gateway-skill"
     }
   },
-  "created_at": "2026-06-04T00:00:00.000Z"
+  "created": true,
+  "existing_profile": false,
+  "message": "Profile registered. Gateway built the canonical UCP profile with default Shopping capabilities. Save agent_id, profile_url, registry_url, and generated profile_json in ./.ucpgateway/agent.json.",
+  "saved_at": "2026-06-04T00:00:00.000Z"
 }

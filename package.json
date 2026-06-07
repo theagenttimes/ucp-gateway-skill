@@ -1,6 +1,6 @@
 {
   "name": "@theagenttimes/ucp-gateway-skill",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "OpenClaw skill and local scripts for The Agent Times UCP Gateway UCP profile and Shopping MCP handoff flow.",
   "type": "module",
   "private": false,
@@ -15,7 +15,7 @@
     "init": "node scripts/init-ucpgateway.mjs",
     "register": "node scripts/register-profile.mjs",
     "call": "node scripts/call-mcp.mjs",
-    "check": "node scripts/init-ucpgateway.mjs --dry-run && node scripts/call-mcp.mjs --help"
+    "check": "node scripts/check-skill.mjs && node scripts/init-ucpgateway.mjs --dry-run && node scripts/call-mcp.mjs --help"
   },
   "bin": {
     "ucpgateway-init": "./scripts/init-ucpgateway.mjs",

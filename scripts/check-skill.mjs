@@ -43,9 +43,12 @@ const keys = frontmatter.split(/\n/).map((line) => line.trim()).filter(Boolean).
 for (const required of ["name", "description"]) {
   if (!keys.includes(required)) fail(`frontmatter missing ${required}`);
 }
-const extraKeys = keys.filter((key) => !["name", "description"].includes(key));
+const extraKeys = keys.filter((key) => !["name", "description", "metadata"].includes(key));
 if (extraKeys.length) fail(`frontmatter contains unsupported keys: ${extraKeys.join(", ")}`);
 if (/\balways\b/i.test(frontmatter)) fail("frontmatter must not contain always");
+if (keys.includes("metadata") && !/metadata:\s*\{\s*"openclaw"\s*:\s*\{\s*"emoji"\s*:/u.test(frontmatter)) {
+  fail("frontmatter metadata may only provide openclaw emoji metadata");
+}
 
 for (const name of toolNames) {
   if (!skill.includes(name)) fail(`SKILL.md missing tool name ${name}`);

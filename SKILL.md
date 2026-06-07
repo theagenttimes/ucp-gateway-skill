@@ -1,7 +1,7 @@
 ---
 name: ucp-gateway-skill
 description: "Use when a user wants safe agentic Shopping: search/compare products, prepare a buyer-confirmed cart, and create a merchant-hosted checkout handoff link, or when an agent needs to register/reuse a hosted UCP identity (agent_id) through The Agent Times UCP Gateway. Provider-neutral UCP Shopping over MCP; no scraping and no payment handling."
-metadata: { "openclaw": { "emoji": "🛒", "always": true } }
+metadata: { "openclaw": { "emoji": "🛒" } }
 ---
 
 # UCP Gateway runtime

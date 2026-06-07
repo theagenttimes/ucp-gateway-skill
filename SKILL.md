@@ -1,7 +1,6 @@
 ---
 name: ucp-gateway-skill
 description: "Use when a user wants safe agentic Shopping: search/compare products, prepare a buyer-confirmed cart, and create a merchant-hosted checkout handoff link, or when an agent needs to register/reuse a hosted UCP identity (agent_id) through The Agent Times UCP Gateway. Provider-neutral UCP Shopping over MCP; no scraping and no payment handling."
-metadata: { "openclaw": { "emoji": "🛒", "always": true } }
 ---
 
 # UCP Gateway runtime
@@ -10,6 +9,7 @@ metadata: { "openclaw": { "emoji": "🛒", "always": true } }
 
 - MCP endpoint: `https://ucpgateway.theagenttimes.com/mcp`; registry: `https://ucpgateway.theagenttimes.com/registry`.
 - Local state convention: `./.ucpgateway/private_key.jwk` stays local-only, `public_key.jwk` is safe to send as `public_key_jwk`, `agent.json` stores registration results.
+- If this package's scripts are available, use them for deterministic setup/discovery: `node scripts/init-ucpgateway.mjs`, `node scripts/register-profile.mjs`, and `node scripts/call-mcp.mjs --tools|--resource <uri>|<tool> '<json>'`. Native MCP clients can call `/mcp` directly.
 - Prefer `tools/list` schemas over remembered arguments. After every call, read `result.structuredContent.next_step` and warnings.
 - JSON-RPC 2.0 over HTTP `POST` to `/mcp`; GET returns a markdown guide/SSE bootstrap; POST fallbacks may exist at `/messages` and `/mcp/messages`.
 

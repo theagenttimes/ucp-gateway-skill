@@ -108,7 +108,9 @@ cd ucp-gateway-skill
 To validate a checkout before editing or publishing, optionally run:
 
 ```bash
-npm run check
+python3 scripts/check_skill.py
+python3 scripts/init_ucpgateway.py --dry-run
+python3 scripts/call_mcp.py --help
 ```
 
 Normal helper usage does not require npm. Run the Python scripts directly:

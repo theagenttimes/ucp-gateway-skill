@@ -4,6 +4,8 @@ Open agents can recommend products, but safe commerce needs structured identity,
 
 `SKILL.md` is the authoritative runtime guide for agents. This README is human onboarding and package documentation.
 
+ClawHub metadata targets the **MCP Tools** category. Source: <https://github.com/theagenttimes/ucp-gateway-skill>. Homepage: <https://ucpgateway.theagenttimes.com/>.
+
 ## What agents can do
 
 - Publish or reuse a hosted UCP profile with `register_ucp_profile` and use the returned `agent_id`.
@@ -102,9 +104,9 @@ Suggested checkout handoff copy:
 git clone https://github.com/theagenttimes/ucp-gateway-skill.git
 cd ucp-gateway-skill
 npm run check
-node scripts/init-ucpgateway.mjs
-node scripts/register-profile.mjs --agent-name "OpenClaw UCP Shopping Agent"
-node scripts/call-mcp.mjs shopping_product_search '{"query":"trail running shoes","limit":5}'
+python3 scripts/init_ucpgateway.py
+python3 scripts/register_profile.py --agent-name "OpenClaw UCP Shopping Agent"
+python3 scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
 ```
 
 Local helper state is written under `./.ucpgateway/`:
@@ -116,7 +118,7 @@ profile.draft.json    optional legacy full-profile draft, not needed for normal 
 agent.json            saved agent_id/profile_url/profile_json after registration
 ```
 
-### `init-ucpgateway.mjs`
+### `init_ucpgateway.py`
 
 - Both key files present: reuse the local keypair and verify public coordinates match the private key.
 - Both missing: generate `private_key.jwk` and `public_key.jwk`.
@@ -125,28 +127,32 @@ agent.json            saved agent_id/profile_url/profile_json after registration
 - `--force-rotate`: intentionally overwrite both key files with a fresh pair.
 - `--dry-run`: non-mutating preview; `--legacy-draft` creates `profile.draft.json` only for advanced legacy profile work.
 
-### `register-profile.mjs`
+### `register_profile.py`
 
 Sends `public_key_jwk` to `register_ucp_profile` and writes `agent.json` with `saved_at` plus `created`, `existing_profile`, and `message`. When the gateway reuses an existing profile and local `agent.json` already has the same `agent_id`, local custom fields are preserved while flags and `saved_at` refresh.
 
-### `call-mcp.mjs`
+### `call_mcp.py`
 
 Discovery modes do not require `agent.json`:
 
 ```bash
-node scripts/call-mcp.mjs --initialize
-node scripts/call-mcp.mjs --tools
-node scripts/call-mcp.mjs --resources
-node scripts/call-mcp.mjs --resource ucp://gateway/skill-runtime-guide
-node scripts/call-mcp.mjs --prompts
-node scripts/call-mcp.mjs --prompt ucp-skill-runtime-guide --prompt-arg shopping_goal='trail running shoes'
+python3 scripts/call_mcp.py --initialize
+python3 scripts/call_mcp.py --tools
+python3 scripts/call_mcp.py --tool shopping_product_search
+python3 scripts/call_mcp.py --shopping-tools
+python3 scripts/call_mcp.py --resources
+python3 scripts/call_mcp.py --resource ucp://gateway/skill-runtime-guide
+python3 scripts/call_mcp.py --prompts
+python3 scripts/call_mcp.py --prompt ucp-skill-runtime-guide --prompt-arg shopping_goal='trail running shoes'
 ```
 
 Tool-call mode injects `agent_id` from `./.ucpgateway/agent.json` for Shopping tools when omitted:
 
 ```bash
-node scripts/call-mcp.mjs shopping_product_search '{"query":"trail running shoes","limit":5}'
+python3 scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
 ```
+
+Tool names, descriptions, and input field descriptions come from the live MCP `tools/list` response, not from a hardcoded local schema. Use `--tool <tool_name>` for the exact descriptor before calling search, cart, or checkout tools.
 
 Environment overrides:
 
@@ -158,4 +164,4 @@ export UCP_AGENT_NAME="OpenClaw UCP Shopping Agent"
 
 ## Version
 
-Current package version: `0.2.0`.
+Current package version: `0.2.1`.

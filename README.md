@@ -105,7 +105,19 @@ The helper scripts require Python 3.8+. Use `uv run python` for live gateway cal
 ```bash
 git clone https://github.com/theagenttimes/ucp-gateway-skill.git
 cd ucp-gateway-skill
-npm run check
+```
+
+To validate a checkout before editing or publishing, optionally run:
+
+```bash
+uv run python scripts/check_skill.py
+uv run python scripts/init_ucpgateway.py --dry-run
+uv run python scripts/call_mcp.py --help
+```
+
+Normal helper usage does not require npm. Run the Python scripts directly:
+
+```bash
 uv run python scripts/init_ucpgateway.py
 uv run python scripts/register_profile.py --agent-name "OpenClaw UCP Shopping Agent"
 uv run python scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'

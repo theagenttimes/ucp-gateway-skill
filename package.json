@@ -15,7 +15,8 @@
     "init": "python3 scripts/init_ucpgateway.py",
     "register": "python3 scripts/register_profile.py",
     "call": "python3 scripts/call_mcp.py",
-    "check": "python3 scripts/check_skill.py && python3 scripts/init_ucpgateway.py --dry-run && python3 scripts/call_mcp.py --help"
+    "check": "python3 scripts/check_skill.py && python3 scripts/init_ucpgateway.py --dry-run && python3 scripts/call_mcp.py --help",
+    "check:live": "uv run python scripts/call_mcp.py --shopping-tools"
   },
   "bin": {
     "ucpgateway-init": "./scripts/init_ucpgateway.py",

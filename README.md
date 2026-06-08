@@ -100,13 +100,15 @@ Suggested checkout handoff copy:
 
 ## Optional helper scripts
 
+The helper scripts require Python 3.8+. Use `uv run python` for live gateway calls when possible; direct `python3` also works when the local Python install has current CA certificates.
+
 ```bash
 git clone https://github.com/theagenttimes/ucp-gateway-skill.git
 cd ucp-gateway-skill
 npm run check
-python3 scripts/init_ucpgateway.py
-python3 scripts/register_profile.py --agent-name "OpenClaw UCP Shopping Agent"
-python3 scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
+uv run python scripts/init_ucpgateway.py
+uv run python scripts/register_profile.py --agent-name "OpenClaw UCP Shopping Agent"
+uv run python scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
 ```
 
 Local helper state is written under `./.ucpgateway/`:
@@ -136,20 +138,20 @@ Sends `public_key_jwk` to `register_ucp_profile` and writes `agent.json` with `s
 Discovery modes do not require `agent.json`:
 
 ```bash
-python3 scripts/call_mcp.py --initialize
-python3 scripts/call_mcp.py --tools
-python3 scripts/call_mcp.py --tool shopping_product_search
-python3 scripts/call_mcp.py --shopping-tools
-python3 scripts/call_mcp.py --resources
-python3 scripts/call_mcp.py --resource ucp://gateway/skill-runtime-guide
-python3 scripts/call_mcp.py --prompts
-python3 scripts/call_mcp.py --prompt ucp-skill-runtime-guide --prompt-arg shopping_goal='trail running shoes'
+uv run python scripts/call_mcp.py --initialize
+uv run python scripts/call_mcp.py --tools
+uv run python scripts/call_mcp.py --tool shopping_product_search
+uv run python scripts/call_mcp.py --shopping-tools
+uv run python scripts/call_mcp.py --resources
+uv run python scripts/call_mcp.py --resource ucp://gateway/skill-runtime-guide
+uv run python scripts/call_mcp.py --prompts
+uv run python scripts/call_mcp.py --prompt ucp-skill-runtime-guide --prompt-arg shopping_goal='trail running shoes'
 ```
 
 Tool-call mode injects `agent_id` from `./.ucpgateway/agent.json` for Shopping tools when omitted:
 
 ```bash
-python3 scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
+uv run python scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
 ```
 
 Tool names, descriptions, and input field descriptions come from the live MCP `tools/list` response, not from a hardcoded local schema. Use `--tool <tool_name>` for the exact descriptor before calling search, cart, or checkout tools.

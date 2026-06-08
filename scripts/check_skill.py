@@ -10,6 +10,25 @@ import sys
 import tempfile
 from pathlib import Path
 
+MIN_PYTHON = (3, 8)
+SCRIPT_NAME = "check_skill.py"
+
+
+def require_supported_python():
+    if sys.version_info >= MIN_PYTHON:
+        return
+    required = ".".join(str(part) for part in MIN_PYTHON)
+    current = ".".join(str(part) for part in sys.version_info[:3])
+    print(
+        f"{SCRIPT_NAME} requires Python {required}+; current Python is {current}. "
+        f"Run it with `uv run python scripts/{SCRIPT_NAME} ...` or a Python {required}+ interpreter.",
+        file=sys.stderr,
+    )
+    sys.exit(2)
+
+
+require_supported_python()
+
 sys.dont_write_bytecode = True
 
 ROOT = Path.cwd()
@@ -48,6 +67,7 @@ EXPECTED_SCRIPTS = {
     "register": "python3 scripts/register_profile.py",
     "call": "python3 scripts/call_mcp.py",
     "check": "python3 scripts/check_skill.py && python3 scripts/init_ucpgateway.py --dry-run && python3 scripts/call_mcp.py --help",
+    "check:live": "uv run python scripts/call_mcp.py --shopping-tools",
 }
 EXPECTED_BIN = {
     "ucpgateway-init": "./scripts/init_ucpgateway.py",

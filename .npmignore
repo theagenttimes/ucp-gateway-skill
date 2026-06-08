@@ -1,0 +1,10 @@
+# Keep the published tarball limited to the package.json "files" allowlist
+# and never ship Python bytecode caches, even if a local validation run
+# (e.g. py_compile or an import) left them behind.
+__pycache__/
+*.pyc
+*.pyo
+.idea/
+.ucpgateway/
+node_modules/
+.DS_Store

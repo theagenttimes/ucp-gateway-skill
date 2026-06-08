@@ -12,7 +12,7 @@ metadata: {"openclaw":{"emoji":"🛒","category":"mcp-tools","homepage":"https:/
 
 - MCP endpoint: `https://ucpgateway.theagenttimes.com/mcp`; registry: `https://ucpgateway.theagenttimes.com/registry`.
 - Local state convention: `./.ucpgateway/private_key.jwk` stays local-only, `public_key.jwk` is safe to send as `public_key_jwk`, `agent.json` stores registration results.
-- If native MCP access is unavailable, use bundled Python helpers: `python3 scripts/init_ucpgateway.py`, `python3 scripts/register_profile.py`, `python3 scripts/call_mcp.py --tools`. `python3 scripts/call_mcp.py --tool <tool_name>` filters the live descriptor/schema for one MCP tool.
+- If native MCP access is unavailable, use bundled Python helpers with Python 3.8+: `uv run python scripts/init_ucpgateway.py`, `uv run python scripts/register_profile.py`, `uv run python scripts/call_mcp.py --tools`. `uv run python scripts/call_mcp.py --tool <tool_name>` filters the live descriptor/schema for one MCP tool.
 - Prefer `tools/list` schemas over remembered arguments. After every call, read `result.structuredContent.next_step` and warnings.
 - JSON-RPC 2.0 over HTTP `POST` to `/mcp`; GET returns a markdown guide/SSE bootstrap; POST fallbacks may exist at `/messages` and `/mcp/messages`.
 

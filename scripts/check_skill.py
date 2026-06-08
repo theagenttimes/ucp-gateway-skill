@@ -17,12 +17,6 @@ TARGET_VERSION = "0.2.1"
 EXPECTED_SOURCE = "https://github.com/theagenttimes/ucp-gateway-skill"
 EXPECTED_HOMEPAGE = "https://ucpgateway.theagenttimes.com/"
 EXPECTED_CATEGORY = "mcp-tools"
-EXPECTED_OPTIONAL_ENV = [
-    "UCP_GATEWAY_MCP_URL",
-    "UCP_NAMESPACE",
-    "UCP_AGENT_NAME",
-    "UCP_AGENT_DESCRIPTION",
-]
 TOOL_NAMES = [
     "register_ucp_profile",
     "get_ucp_profile",
@@ -93,7 +87,7 @@ def check_frontmatter(skill):
         fail("frontmatter must contain one tags line")
     else:
         tags_text = tag_lines[0].split(":", 1)[1]
-        for required_tag in ("mcp-tools", "mcp", "shopping", "ucp"):
+        for required_tag in ("mcp", "shopping", "ucp"):
             if required_tag not in tags_text:
                 fail(f"frontmatter tags must include {required_tag}")
     if re.search(r"\balways\b", frontmatter, flags=re.IGNORECASE):
@@ -111,7 +105,7 @@ def check_frontmatter(skill):
     if not isinstance(openclaw, dict):
         fail("frontmatter metadata.openclaw must be an object")
         return
-    allowed_openclaw = {"emoji", "category", "homepage", "source", "requires"}
+    allowed_openclaw = {"emoji", "category", "homepage", "source", "requires", "paths"}
     extra_openclaw = sorted(set(openclaw) - allowed_openclaw)
     if extra_openclaw:
         fail(f"frontmatter metadata.openclaw has unsupported keys: {', '.join(extra_openclaw)}")
@@ -122,23 +116,29 @@ def check_frontmatter(skill):
     if openclaw.get("source") != EXPECTED_SOURCE:
         fail(f"frontmatter metadata.openclaw.source must be {EXPECTED_SOURCE}")
     requires = openclaw.get("requires")
-    if not isinstance(requires, dict):
-        fail("frontmatter metadata.openclaw.requires must be an object")
-        return
-    allowed_requires = {"bins", "tools", "env", "optionalEnv", "paths"}
-    extra_requires = sorted(set(requires) - allowed_requires)
-    if extra_requires:
-        fail(f"frontmatter metadata.openclaw.requires has unsupported keys: {', '.join(extra_requires)}")
-    if requires.get("bins") != ["python3"]:
-        fail("frontmatter metadata.openclaw.requires.bins must be ['python3']")
-    if requires.get("tools") != []:
-        fail("frontmatter metadata.openclaw.requires.tools must be []")
-    if requires.get("env") != []:
-        fail("frontmatter metadata.openclaw.requires.env must be []")
-    if requires.get("optionalEnv") != EXPECTED_OPTIONAL_ENV:
-        fail("frontmatter metadata.openclaw.requires.optionalEnv must list the supported UCP_* overrides")
-    if requires.get("paths") != ["./.ucpgateway/"]:
-        fail("frontmatter metadata.openclaw.requires.paths must be ['./.ucpgateway/']")
+    if requires is not None:
+        if not isinstance(requires, dict):
+            fail("frontmatter metadata.openclaw.requires must be an object when present")
+            return
+        allowed_requires = {"bins", "tools", "env", "optionalEnv", "paths"}
+        extra_requires = sorted(set(requires) - allowed_requires)
+        if extra_requires:
+            fail(f"frontmatter metadata.openclaw.requires has unsupported keys: {', '.join(extra_requires)}")
+        bins = requires.get("bins")
+        if bins not in (None, ["python3"]):
+            fail("frontmatter metadata.openclaw.requires.bins may only require ['python3']")
+        tools = requires.get("tools")
+        if tools not in (None, []):
+            fail("frontmatter metadata.openclaw.requires.tools must be [] when present")
+        env = requires.get("env")
+        if env not in (None, []):
+            fail("frontmatter metadata.openclaw.requires.env must be [] when present")
+        paths = requires.get("paths")
+        if paths not in (None, ["./.ucpgateway/"]):
+            fail("frontmatter metadata.openclaw.requires.paths must be ['./.ucpgateway/'] when present")
+    paths = openclaw.get("paths")
+    if paths != ["./.ucpgateway/"]:
+        fail("frontmatter metadata.openclaw.paths must be ['./.ucpgateway/']")
 
 
 def check_skill_text(skill):

@@ -23,7 +23,9 @@ Mitigation: Treat product search/detail as read-only, ask explicit buyer/operato
 Risk: Checkout handoff can look like purchase completion even though payment is not authorized by the agent. <br>
 Mitigation: Always hand off the merchant continue_url to the buyer; the buyer reviews merchant totals, shipping, taxes, terms, and enters payment details only on the merchant site. <br>
 Risk: Buyer contact and shipping data is sensitive. <br>
-Mitigation: Collect only buyer-provided fields required by the live MCP schema, never invent PII, and never send card, CVV, bank, wallet, payment token, password, or one-time payment code fields. <br>
+Mitigation: Collect only buyer-provided fields required by the live MCP schema or catalog/product fulfillment metadata, let buyers enter optional shipping details on the merchant checkout page, never invent PII, and never send card, CVV, bank, wallet, payment token, password, or one-time payment code fields. <br>
+Risk: Checkout creation may return a wrapper success without a usable merchant handoff. <br>
+Mitigation: Treat ok: true as insufficient by itself; require a usable continue_url plus checkout/session identity, and surface provider errors or empty checkout artifacts as warnings/errors. <br>
 
 Reference(s): <br>
 ClawHub Skill Page <br>

@@ -103,7 +103,17 @@ Suggested checkout handoff copy:
 ```bash
 git clone https://github.com/theagenttimes/ucp-gateway-skill.git
 cd ucp-gateway-skill
+```
+
+To validate a checkout before editing or publishing, optionally run:
+
+```bash
 npm run check
+```
+
+Normal helper usage does not require npm. Run the Python scripts directly:
+
+```bash
 python3 scripts/init_ucpgateway.py
 python3 scripts/register_profile.py --agent-name "OpenClaw UCP Shopping Agent"
 python3 scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'

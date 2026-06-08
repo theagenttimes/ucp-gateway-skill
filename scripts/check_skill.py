@@ -165,6 +165,16 @@ def check_skill_text(skill):
     for name in TOOL_NAMES:
         if name not in skill:
             fail(f"SKILL.md missing tool name {name}")
+    required_guidance = [
+        "Use catalog/product metadata as the source of truth",
+        "do not infer that shipping address or country is required",
+        "let the buyer defer them",
+        "Treat `ok: true` as insufficient for checkout success",
+        "non-empty `continue_url`",
+    ]
+    for phrase in required_guidance:
+        if phrase not in skill:
+            fail(f"SKILL.md missing shopping flow guidance: {phrase}")
     if re.search(r"shopify_", skill, flags=re.IGNORECASE):
         fail("SKILL.md must not contain provider-specific aliases")
     for alias in OLD_ALIASES:

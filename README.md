@@ -76,15 +76,24 @@ dev.ucp.shopping.checkout
 ## Safe Shopping flow
 
 1. Load/register `agent_id`.
-2. Search with `shopping_product_search`.
+2. Search with `shopping_product_search`, using destination context only when the buyer provides it or shipping availability is part of the request.
 3. Fetch detail with `shopping_product_get` when variant, merchant, or availability detail is needed.
-4. Show provider-returned options only; do not invent prices, availability, URLs, variants, merchant domains, or warnings.
+4. Show provider-returned options only; do not invent prices, availability, URLs, variants, merchant domains, fulfillment/address requirements, or warnings.
 5. Ask buyer/operator to choose variant(s) and quantity.
 6. Create/update/cancel cart only after explicit confirmation.
 7. Show cart items, totals, messages, warnings, and any `continue_url`.
-8. Collect checkout contact/shipping data only from the buyer.
-9. Ask final confirmation, then call `shopping_checkout_create` with `operator_confirmed: true`.
-10. Hand off merchant `continue_url`; the buyer enters payment on the merchant site.
+8. Collect checkout contact/shipping data only from the buyer, and only when catalog/product metadata, live tool schema, cart warnings, or checkout errors require it before checkout creation.
+9. If shipping details are optional, unknown, or can be entered on the merchant checkout page, let the buyer defer them and warn that merchant totals, taxes, delivery options, or availability may change.
+10. Ask final confirmation, then call `shopping_checkout_create` with `operator_confirmed: true`.
+11. Hand off merchant `continue_url`; the buyer enters payment on the merchant site.
+
+## Address and checkout guidance
+
+Use catalog/product fulfillment metadata as the source of truth for destination and shipping-address requirements. Do not infer that a country or shipping address is required from environment estimates, merchant type, or a physical-goods assumption. Digital and other non-shipping products may need no shipping data, while some merchants collect address only on their hosted checkout page.
+
+Cart-first is the safe default because it lets the buyer review items, quantities, totals, messages, and warnings before checkout handoff. Direct checkout from line items remains an optional fast path when item, quantity, and buyer intent are already confirmed.
+
+`ok: true` alone is not a successful checkout handoff. A usable checkout result needs a non-empty `continue_url` and a checkout ID or clearly valid merchant session. Raw provider errors, missing IDs, empty line items, or empty totals should be presented as warnings/errors rather than success.
 
 ## Safety boundaries
 
@@ -93,6 +102,7 @@ dev.ucp.shopping.checkout
 - No invented buyer PII.
 - `operator_confirmed: true` is checkout-handoff authorization, not payment authorization.
 - `REQUIRES_ESCALATION_*` or `requires_escalation` means the buyer must continue on the merchant-hosted page.
+- Buyer contact and shipping fields are property-driven: collect them only when the live schema or catalog/cart/checkout metadata requires them, or when the buyer chooses to provide them.
 
 Suggested checkout handoff copy:
 

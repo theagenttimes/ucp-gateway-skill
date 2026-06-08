@@ -13,7 +13,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 
 ROOT = Path.cwd()
-TARGET_VERSION = "0.2.2"
+TARGET_VERSION = "0.2.3"
 EXPECTED_SOURCE = "https://github.com/theagenttimes/ucp-gateway-skill"
 EXPECTED_HOMEPAGE = "https://ucpgateway.theagenttimes.com/"
 EXPECTED_CATEGORY = "mcp-tools"

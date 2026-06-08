@@ -1,7 +1,9 @@
 ---
 name: ucp-gateway-skill
+version: 0.2.1
 description: "Use when a user wants safe agentic Shopping: search/compare products, prepare a buyer-confirmed cart, and create a merchant-hosted checkout handoff link, or when an agent needs to register/reuse a hosted UCP identity (agent_id) through The Agent Times UCP Gateway. Provider-neutral UCP Shopping over MCP; no scraping and no payment handling."
-metadata: { "openclaw": { "emoji": "🛒" } }
+tags: [ecommerce, shopping-agent, mcp, ucp, universal-commerce-protocol, shopping, agentic-commerce, checkout-handoff]
+metadata: {"openclaw":{"emoji":"🛒","category":"mcp-tools","homepage":"https://ucpgateway.theagenttimes.com/","source":"https://github.com/theagenttimes/ucp-gateway-skill","paths":["./.ucpgateway/"]}}
 ---
 
 # UCP Gateway runtime
@@ -10,7 +12,7 @@ metadata: { "openclaw": { "emoji": "🛒" } }
 
 - MCP endpoint: `https://ucpgateway.theagenttimes.com/mcp`; registry: `https://ucpgateway.theagenttimes.com/registry`.
 - Local state convention: `./.ucpgateway/private_key.jwk` stays local-only, `public_key.jwk` is safe to send as `public_key_jwk`, `agent.json` stores registration results.
-- If native MCP access is unavailable, use bundled Python helpers: `python3 scripts/init_ucpgateway.py`, `python3 scripts/register_profile.py`, `python3 scripts/call_mcp.py --tools`.
+- If native MCP access is unavailable, use bundled Python helpers: `python3 scripts/init_ucpgateway.py`, `python3 scripts/register_profile.py`, `python3 scripts/call_mcp.py --tools`. `python3 scripts/call_mcp.py --tool <tool_name>` filters the live descriptor/schema for one MCP tool.
 - Prefer `tools/list` schemas over remembered arguments. After every call, read `result.structuredContent.next_step` and warnings.
 - JSON-RPC 2.0 over HTTP `POST` to `/mcp`; GET returns a markdown guide/SSE bootstrap; POST fallbacks may exist at `/messages` and `/mcp/messages`.
 

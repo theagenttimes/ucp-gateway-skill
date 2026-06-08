@@ -1,7 +1,7 @@
 {
   "name": "@theagenttimes/ucp-gateway-skill",
   "version": "0.2.1",
-  "description": "OpenClaw skill and local scripts for The Agent Times UCP Gateway UCP profile and Shopping MCP handoff flow.",
+  "description": "OpenClaw MCP Tools skill and local Python helpers for The Agent Times UCP Gateway profile, Shopping search, cart, and checkout handoff flow.",
   "private": false,
   "files": [
     "SKILL.md",
@@ -29,6 +29,7 @@
     "shopping",
     "ucp-shopping",
     "mcp",
+    "mcp-tools",
     "agentic-commerce",
     "checkout-handoff",
     "the-agent-times"
@@ -38,7 +39,7 @@
     "type": "git",
     "url": "git+https://github.com/theagenttimes/ucp-gateway-skill.git"
   },
-  "homepage": "https://ucpgateway.theagenttimes.com",
+  "homepage": "https://ucpgateway.theagenttimes.com/",
   "bugs": {
     "url": "https://github.com/theagenttimes/ucp-gateway-skill/issues",
     "email": "contact@theagenttimes.com"

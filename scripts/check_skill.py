@@ -14,6 +14,15 @@ sys.dont_write_bytecode = True
 
 ROOT = Path.cwd()
 TARGET_VERSION = "0.2.1"
+EXPECTED_SOURCE = "https://github.com/theagenttimes/ucp-gateway-skill"
+EXPECTED_HOMEPAGE = "https://ucpgateway.theagenttimes.com/"
+EXPECTED_CATEGORY = "mcp-tools"
+EXPECTED_OPTIONAL_ENV = [
+    "UCP_GATEWAY_MCP_URL",
+    "UCP_NAMESPACE",
+    "UCP_AGENT_NAME",
+    "UCP_AGENT_DESCRIPTION",
+]
 TOOL_NAMES = [
     "register_ucp_profile",
     "get_ucp_profile",
@@ -71,19 +80,65 @@ def check_frontmatter(skill):
     frontmatter = match.group(1)
     lines = [line.strip() for line in frontmatter.splitlines() if line.strip()]
     keys = [line.split(":", 1)[0] for line in lines]
-    for required in ("name", "description"):
+    for required in ("name", "version", "description", "tags", "metadata"):
         if required not in keys:
             fail(f"frontmatter missing {required}")
-    extra = [key for key in keys if key not in {"name", "description", "metadata"}]
+    extra = [key for key in keys if key not in {"name", "version", "description", "tags", "metadata"}]
     if extra:
         fail(f"frontmatter contains unsupported keys: {', '.join(extra)}")
+    if f"version: {TARGET_VERSION}" not in lines:
+        fail(f"frontmatter version must be {TARGET_VERSION}")
+    tag_lines = [line for line in lines if line.startswith("tags:")]
+    if len(tag_lines) != 1:
+        fail("frontmatter must contain one tags line")
+    else:
+        tags_text = tag_lines[0].split(":", 1)[1]
+        for required_tag in ("mcp-tools", "mcp", "shopping", "ucp"):
+            if required_tag not in tags_text:
+                fail(f"frontmatter tags must include {required_tag}")
     if re.search(r"\balways\b", frontmatter, flags=re.IGNORECASE):
         fail("frontmatter must not contain always")
     metadata_lines = [line for line in lines if line.startswith("metadata:")]
-    if metadata_lines:
-        allowed = re.compile(r'^metadata:\s*\{\s*"openclaw"\s*:\s*\{\s*"emoji"\s*:\s*"[^"]+"\s*\}\s*\}\s*$')
-        if len(metadata_lines) != 1 or not allowed.match(metadata_lines[0]):
-            fail("frontmatter metadata may only provide OpenClaw emoji metadata")
+    if len(metadata_lines) != 1:
+        fail("frontmatter must contain one metadata line")
+        return
+    try:
+        metadata = json.loads(metadata_lines[0].split(":", 1)[1].strip())
+    except json.JSONDecodeError as exc:
+        fail(f"frontmatter metadata must be single-line JSON: {exc.msg}")
+        return
+    openclaw = metadata.get("openclaw") if isinstance(metadata, dict) else None
+    if not isinstance(openclaw, dict):
+        fail("frontmatter metadata.openclaw must be an object")
+        return
+    allowed_openclaw = {"emoji", "category", "homepage", "source", "requires"}
+    extra_openclaw = sorted(set(openclaw) - allowed_openclaw)
+    if extra_openclaw:
+        fail(f"frontmatter metadata.openclaw has unsupported keys: {', '.join(extra_openclaw)}")
+    if openclaw.get("category") != EXPECTED_CATEGORY:
+        fail(f"frontmatter metadata.openclaw.category must be {EXPECTED_CATEGORY}")
+    if openclaw.get("homepage") != EXPECTED_HOMEPAGE:
+        fail(f"frontmatter metadata.openclaw.homepage must be {EXPECTED_HOMEPAGE}")
+    if openclaw.get("source") != EXPECTED_SOURCE:
+        fail(f"frontmatter metadata.openclaw.source must be {EXPECTED_SOURCE}")
+    requires = openclaw.get("requires")
+    if not isinstance(requires, dict):
+        fail("frontmatter metadata.openclaw.requires must be an object")
+        return
+    allowed_requires = {"bins", "tools", "env", "optionalEnv", "paths"}
+    extra_requires = sorted(set(requires) - allowed_requires)
+    if extra_requires:
+        fail(f"frontmatter metadata.openclaw.requires has unsupported keys: {', '.join(extra_requires)}")
+    if requires.get("bins") != ["python3"]:
+        fail("frontmatter metadata.openclaw.requires.bins must be ['python3']")
+    if requires.get("tools") != []:
+        fail("frontmatter metadata.openclaw.requires.tools must be []")
+    if requires.get("env") != []:
+        fail("frontmatter metadata.openclaw.requires.env must be []")
+    if requires.get("optionalEnv") != EXPECTED_OPTIONAL_ENV:
+        fail("frontmatter metadata.openclaw.requires.optionalEnv must list the supported UCP_* overrides")
+    if requires.get("paths") != ["./.ucpgateway/"]:
+        fail("frontmatter metadata.openclaw.requires.paths must be ['./.ucpgateway/']")
 
 
 def check_skill_text(skill):
@@ -100,6 +155,15 @@ def check_skill_text(skill):
 def check_package(pkg):
     if pkg.get("version") != TARGET_VERSION:
         fail(f"package.json version must be {TARGET_VERSION}")
+    if pkg.get("homepage") != EXPECTED_HOMEPAGE:
+        fail(f"package.json homepage must be {EXPECTED_HOMEPAGE}")
+    repository = pkg.get("repository") or {}
+    if repository.get("url") != "git+" + EXPECTED_SOURCE + ".git":
+        fail("package.json repository.url must point to the GitHub source repository")
+    keywords = pkg.get("keywords") or []
+    for keyword in ("mcp-tools", "mcp", "ucp", "shopping"):
+        if keyword not in keywords:
+            fail(f"package.json keywords must include {keyword}")
     if pkg.get("type") == "module":
         fail("package.json should not declare ESM module mode after the Python rewrite")
     scripts = pkg.get("scripts") or {}
@@ -281,6 +345,69 @@ def check_init_tempdir_behaviour():
         fail(f"init_ucpgateway.py offline behaviour test failed: {exc}")
 
 
+def check_call_mcp_tool_descriptor_filter():
+    try:
+        import call_mcp as call_script
+    except Exception as exc:  # noqa: BLE001 - report concise check failure
+        fail(f"could not import call_mcp.py for offline tests: {exc}")
+        return
+
+    sample_tools = [
+        {
+            "name": "shopping_product_search",
+            "description": "Search the product catalog through The Agent Times UCP Gateway.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "agent_id": {"type": "string", "description": "Registered UCP Gateway UUID."},
+                    "query": {"type": "string", "description": "Natural-language product search query."},
+                },
+                "required": ["agent_id", "query"],
+            },
+        },
+        {"name": "shopping_cart_create", "description": "Create a merchant cart.", "inputSchema": {"type": "object"}},
+        {"name": "shopping_checkout_create", "description": "Create a merchant checkout handoff URL.", "inputSchema": {"type": "object"}},
+    ]
+
+    original_post_json = call_script.post_json
+
+    def fake_post_json(url, payload, timeout=60):  # noqa: ARG001 - signature mirrors helper
+        if payload.get("method") != "tools/list":
+            raise AssertionError("descriptor filter must discover schemas through tools/list")
+        return {"jsonrpc": "2.0", "id": payload.get("id"), "result": {"tools": sample_tools}}, 200
+
+    try:
+        call_script.post_json = fake_post_json
+        out = io.StringIO()
+        code = call_script.run(["--tool", "shopping_product_search"], cwd=ROOT, stdout=out, stderr=io.StringIO())
+        if code != 0:
+            fail("call_mcp.py --tool shopping_product_search should succeed with tools/list data")
+            return
+        filtered = json.loads(out.getvalue())
+        if filtered.get("source") != "tools/list":
+            fail("call_mcp.py --tool output must identify tools/list as descriptor source")
+        tools = filtered.get("tools") or []
+        if len(tools) != 1 or tools[0].get("name") != "shopping_product_search":
+            fail("call_mcp.py --tool must print only the requested tool descriptor")
+        query_description = (((tools[0].get("inputSchema") or {}).get("properties") or {}).get("query") or {}).get("description")
+        if "Natural-language" not in (query_description or ""):
+            fail("call_mcp.py --tool must preserve query field descriptions from tools/list")
+
+        out = io.StringIO()
+        code = call_script.run(["--shopping-tools"], cwd=ROOT, stdout=out, stderr=io.StringIO())
+        if code != 0:
+            fail("call_mcp.py --shopping-tools should succeed with tools/list data")
+            return
+        filtered = json.loads(out.getvalue())
+        names = [tool.get("name") for tool in filtered.get("tools") or []]
+        if names != ["shopping_product_search", "shopping_cart_create", "shopping_checkout_create"]:
+            fail("call_mcp.py --shopping-tools must print search, cart-create, and checkout-create descriptors in order")
+    except Exception as exc:  # noqa: BLE001 - continue with concise validation failure
+        fail(f"call_mcp.py descriptor filter offline test failed: {exc}")
+    finally:
+        call_script.post_json = original_post_json
+
+
 def main():
     try:
         skill = read_text(ROOT / "SKILL.md")
@@ -297,6 +424,7 @@ def main():
     check_examples()
     check_no_stale_runtime_refs()
     check_init_tempdir_behaviour()
+    check_call_mcp_tool_descriptor_filter()
 
     if ERRORS:
         for message in ERRORS:

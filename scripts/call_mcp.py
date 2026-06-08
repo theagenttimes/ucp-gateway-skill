@@ -10,6 +10,11 @@ import uuid
 from pathlib import Path
 
 DEFAULT_GATEWAY = "https://ucpgateway.theagenttimes.com/mcp"
+COMMON_SHOPPING_TOOLS = [
+    "shopping_product_search",
+    "shopping_cart_create",
+    "shopping_checkout_create",
+]
 
 
 class CallMcpError(Exception):
@@ -22,6 +27,8 @@ def usage(stream=sys.stdout):
   python3 scripts/call_mcp.py <tool_name> '<json-arguments>'
   python3 scripts/call_mcp.py --initialize
   python3 scripts/call_mcp.py --tools
+  python3 scripts/call_mcp.py --tool <tool_name>
+  python3 scripts/call_mcp.py --shopping-tools
   python3 scripts/call_mcp.py --resources
   python3 scripts/call_mcp.py --resource <uri>
   python3 scripts/call_mcp.py --prompts
@@ -30,12 +37,15 @@ def usage(stream=sys.stdout):
 Examples:
   python3 scripts/call_mcp.py --initialize
   python3 scripts/call_mcp.py --tools
+  python3 scripts/call_mcp.py --tool shopping_product_search
+  python3 scripts/call_mcp.py --shopping-tools
   python3 scripts/call_mcp.py --resource ucp://gateway/skill-runtime-guide
   python3 scripts/call_mcp.py --prompt ucp-skill-runtime-guide --prompt-arg shopping_goal='trail running shoes'
   python3 scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
   python3 scripts/call_mcp.py shopping_product_get '{"product_id":"provider-product-id","merchant_domain":"merchant.example"}'
 
 The full JSON-RPC response is printed, including result.next_step and result.structuredContent.next_step.
+Tool names, descriptions, and input field descriptions are discovered from live MCP tools/list.
 Discovery modes do not require ./.ucpgateway/agent.json.
 If ./.ucpgateway/agent.json exists, agent_id is injected automatically for Shopping tools when absent.
 """
@@ -139,6 +149,48 @@ def post_json(url, payload, timeout=60):
         raise CallMcpError("Gateway response was not valid JSON.") from exc
 
 
+def tool_descriptor_request(argv):
+    if has_flag(argv, "--shopping-tools"):
+        return COMMON_SHOPPING_TOOLS
+    if has_flag(argv, "--tool"):
+        name = flag_value(argv, "--tool")
+        if not name:
+            raise CallMcpError("--tool requires a tool name")
+        return [name]
+    return None
+
+
+def print_tool_descriptors(gateway, names, stdout, stderr):
+    response, http_status = post_json(
+        gateway,
+        {"jsonrpc": "2.0", "id": str(uuid.uuid4()), "method": "tools/list"},
+    )
+    tools = (((response or {}).get("result") or {}).get("tools") or []) if isinstance(response, dict) else []
+    by_name = {tool.get("name"): tool for tool in tools if isinstance(tool, dict)}
+    selected = [by_name[name] for name in names if name in by_name]
+    missing = [name for name in names if name not in by_name]
+    print(
+        json.dumps(
+            {
+                "source": "tools/list",
+                "gateway": gateway,
+                "tools": selected,
+                "missing": missing,
+                "note": "Tool names, descriptions, and input field descriptions are authoritative from the live MCP tools/list response.",
+            },
+            indent=2,
+        ),
+        file=stdout,
+    )
+    if http_status >= 400:
+        print(f"call_mcp: gateway returned HTTP {http_status}", file=stderr)
+        return 1
+    if missing:
+        print(f"call_mcp: tool descriptor(s) not found: {', '.join(missing)}", file=stderr)
+        return 1
+    return 0
+
+
 def build_tool_request(argv, root):
     tool = argv[0]
     try:
@@ -163,6 +215,10 @@ def run(argv=None, cwd=None, stdout=None, stderr=None):
 
     root = Path(cwd or os.getcwd())
     gateway = os.environ.get("UCP_GATEWAY_MCP_URL") or DEFAULT_GATEWAY
+    descriptor_names = tool_descriptor_request(argv)
+    if descriptor_names is not None:
+        return print_tool_descriptors(gateway, descriptor_names, stdout, stderr)
+
     request = discovery_request(argv)
     if request is None:
         if argv[0].startswith("--"):

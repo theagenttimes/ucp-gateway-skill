@@ -4,6 +4,8 @@ Open agents can recommend products, but safe commerce needs structured identity,
 
 `SKILL.md` is the authoritative runtime guide for agents. This README is human onboarding and package documentation.
 
+ClawHub metadata targets the **MCP Tools** category. Source: <https://github.com/theagenttimes/ucp-gateway-skill>. Homepage: <https://ucpgateway.theagenttimes.com/>.
+
 ## What agents can do
 
 - Publish or reuse a hosted UCP profile with `register_ucp_profile` and use the returned `agent_id`.
@@ -136,6 +138,8 @@ Discovery modes do not require `agent.json`:
 ```bash
 python3 scripts/call_mcp.py --initialize
 python3 scripts/call_mcp.py --tools
+python3 scripts/call_mcp.py --tool shopping_product_search
+python3 scripts/call_mcp.py --shopping-tools
 python3 scripts/call_mcp.py --resources
 python3 scripts/call_mcp.py --resource ucp://gateway/skill-runtime-guide
 python3 scripts/call_mcp.py --prompts
@@ -147,6 +151,8 @@ Tool-call mode injects `agent_id` from `./.ucpgateway/agent.json` for Shopping t
 ```bash
 python3 scripts/call_mcp.py shopping_product_search '{"query":"trail running shoes","limit":5}'
 ```
+
+Tool names, descriptions, and input field descriptions come from the live MCP `tools/list` response, not from a hardcoded local schema. Use `--tool <tool_name>` for the exact descriptor before calling search, cart, or checkout tools.
 
 Environment overrides:
 

@@ -164,4 +164,4 @@ export UCP_AGENT_NAME="OpenClaw UCP Shopping Agent"
 
 ## Version
 
-Current package version: `0.2.2`.
+Current package version: `0.2.3`.

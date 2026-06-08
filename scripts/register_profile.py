@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 DEFAULT_GATEWAY = "https://ucpgateway.theagenttimes.com/mcp"
-PACKAGE_VERSION = "0.2.2"
+PACKAGE_VERSION = "0.2.3"
 PRIVATE_FIELDS = {"d", "p", "q", "dp", "dq", "qi", "k"}
 
 

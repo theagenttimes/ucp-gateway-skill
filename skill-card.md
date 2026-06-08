@@ -40,7 +40,7 @@ Skill Output: <br>
 **Other Properties Related to Output:** [Requires python3 for optional local helper scripts; uses UCP_GATEWAY_MCP_URL, UCP_NAMESPACE, UCP_AGENT_NAME, and UCP_AGENT_DESCRIPTION as optional environment overrides; stores local helper state in ./.ucpgateway/.] <br>
 
 Skill Version(s): <br>
-0.2.2 (source: package.json and SKILL.md frontmatter) <br>
+0.2.3 (source: package.json and SKILL.md frontmatter) <br>
 
 Ethical Considerations: <br>
 Users should review all product, cart, and checkout details before relying on them. Agents must preserve buyer agency, avoid hidden purchasing, avoid payment handling, and follow applicable commerce, privacy, and platform policies before deployment. <br>

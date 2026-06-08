@@ -1,10 +1,11 @@
 {
   "name": "@theagenttimes/ucp-gateway-skill",
-  "version": "0.2.1",
-  "description": "OpenClaw MCP Tools skill and local Python helpers for The Agent Times UCP Gateway profile, Shopping search, cart, and checkout handoff flow.",
+  "version": "0.2.2",
+  "description": "OpenClaw MCP Tools skill and local Python helpers for The Agent Times UCP Gateway MCP server, Shopping search, cart, and checkout handoff flow.",
   "private": false,
   "files": [
     "SKILL.md",
+    "skill-card.md",
     "README.md",
     "scripts/",
     "examples/",

@@ -1,6 +1,6 @@
 # The Agent Times UCP Gateway Skill
 
-Open agents can recommend products, but safe commerce needs structured identity, confirmation, and handoff. The Agent Times UCP Gateway gives agents a hosted UCP identity registry and a provider-neutral Shopping MCP gateway for product search, buyer-confirmed carts, and merchant-hosted checkout links — without scraping, provider secrets, or payment handling.
+Open agents can recommend products, but safe commerce needs structured identity, confirmation, and handoff. The Agent Times UCP Gateway gives agents a hosted UCP identity registry and provider-neutral Shopping MCP tools for product search, buyer-confirmed carts, and merchant-hosted checkout links — without scraping, provider secrets, or payment handling.
 
 `SKILL.md` is the authoritative runtime guide for agents. This README is human onboarding and package documentation.
 
@@ -164,4 +164,4 @@ export UCP_AGENT_NAME="OpenClaw UCP Shopping Agent"
 
 ## Version
 
-Current package version: `0.2.1`.
+Current package version: `0.2.2`.

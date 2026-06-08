@@ -1,7 +1,7 @@
 ---
 name: ucp-gateway-skill
-version: 0.2.1
-description: "Use when a user wants safe agentic Shopping: search/compare products, prepare a buyer-confirmed cart, and create a merchant-hosted checkout handoff link, or when an agent needs to register/reuse a hosted UCP identity (agent_id) through The Agent Times UCP Gateway. Provider-neutral UCP Shopping over MCP; no scraping and no payment handling."
+version: 0.2.2
+description: "MCP Tools skill for AI agent commerce. Use when a user wants agentic Shopping to search/compare products, prepare a buyer-confirmed cart, and create a merchant-hosted checkout handoff link, or when an agent needs to register/reuse a hosted UCP identity (agent_id). Provider-neutral UCP Shopping MCP tools; no scraping and no payment handling."
 tags: [ecommerce, shopping-agent, mcp, ucp, universal-commerce-protocol, shopping, agentic-commerce, checkout-handoff]
 metadata: {"openclaw":{"emoji":"🛒","category":"mcp-tools","homepage":"https://ucpgateway.theagenttimes.com/","source":"https://github.com/theagenttimes/ucp-gateway-skill","paths":["./.ucpgateway/"]}}
 ---

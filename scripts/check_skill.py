@@ -13,7 +13,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 
 ROOT = Path.cwd()
-TARGET_VERSION = "0.2.1"
+TARGET_VERSION = "0.2.2"
 EXPECTED_SOURCE = "https://github.com/theagenttimes/ucp-gateway-skill"
 EXPECTED_HOMEPAGE = "https://ucpgateway.theagenttimes.com/"
 EXPECTED_CATEGORY = "mcp-tools"
@@ -239,6 +239,17 @@ def check_examples():
             fail(f"examples/{path.name} is not valid JSON: {exc.msg}")
 
 
+def check_skill_card():
+    card_path = ROOT / "skill-card.md"
+    if not card_path.exists():
+        fail("skill-card.md must be included for ClawHub verification")
+        return
+    card = read_text(card_path)
+    for required in ("Description:", "Use Case:", "Known Risks and Mitigations:", "Skill Output:", "Skill Version(s):"):
+        if required not in card:
+            fail(f"skill-card.md missing {required}")
+
+
 def check_no_stale_runtime_refs():
     legacy_token = "." + "mjs"
     old_command_token = "node " + "scripts/"
@@ -422,6 +433,7 @@ def main():
     check_python_scripts()
     check_version_fallback()
     check_examples()
+    check_skill_card()
     check_no_stale_runtime_refs()
     check_init_tempdir_behaviour()
     check_call_mcp_tool_descriptor_filter()

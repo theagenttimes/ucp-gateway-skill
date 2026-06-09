@@ -32,9 +32,9 @@ require_supported_python()
 sys.dont_write_bytecode = True
 
 ROOT = Path.cwd()
-TARGET_VERSION = "0.2.3"
+TARGET_VERSION = "0.2.4"
 EXPECTED_SOURCE = "https://github.com/theagenttimes/ucp-gateway-skill"
-EXPECTED_HOMEPAGE = "https://ucpgateway.theagenttimes.com/"
+EXPECTED_HOMEPAGE = "https://ucpg.ai/"
 EXPECTED_CATEGORY = "mcp-tools"
 TOOL_NAMES = [
     "register_ucp_profile",

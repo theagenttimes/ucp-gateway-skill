@@ -10,7 +10,7 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-DEFAULT_GATEWAY = "https://ucpgateway.theagenttimes.com/mcp"
+DEFAULT_GATEWAY = "https://ucpg.ai/mcp"
 MIN_PYTHON = (3, 8)
 SCRIPT_NAME = "call_mcp.py"
 COMMON_SHOPPING_TOOLS = [

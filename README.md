@@ -4,7 +4,7 @@ Open agents can recommend products, but safe commerce needs structured identity,
 
 `SKILL.md` is the authoritative runtime guide for agents. This README is human onboarding and package documentation.
 
-ClawHub metadata targets the **MCP Tools** category. Source: <https://github.com/theagenttimes/ucp-gateway-skill>. Homepage: <https://ucpgateway.theagenttimes.com/>.
+ClawHub metadata targets the **MCP Tools** category. Source: <https://github.com/theagenttimes/ucp-gateway-skill>. Homepage: <https://ucpg.ai/>.
 
 ## What agents can do
 
@@ -45,10 +45,12 @@ The skill is usable from `SKILL.md` alone. Helper scripts are optional determini
 ## MCP endpoint
 
 ```text
-https://ucpgateway.theagenttimes.com/mcp
+https://ucpg.ai/mcp
 ```
 
 Use JSON-RPC 2.0 `POST /mcp` for `initialize`, `tools/list`, `tools/call`, `resources/list/read`, and `prompts/list/get`. GET `/mcp` returns a markdown guide/SSE bootstrap; `/messages` and `/mcp/messages` may exist as POST fallbacks.
+
+Legacy `https://ucpgateway.theagenttimes.com/mcp` still works. New integrations should use `https://ucpg.ai/mcp`; existing installs can keep their saved endpoint or override it with `UCP_GATEWAY_MCP_URL`.
 
 Agents should not load every resource at startup. Branch by state: register if no `agent_id`, search if shopping intent is clear, and read focused resources/prompts only when needed.
 
@@ -171,11 +173,11 @@ Tool names, descriptions, and input field descriptions come from the live MCP `t
 Environment overrides:
 
 ```bash
-export UCP_GATEWAY_MCP_URL=https://ucpgateway.theagenttimes.com/mcp
+export UCP_GATEWAY_MCP_URL=https://ucpg.ai/mcp
 export UCP_NAMESPACE=openclaw
 export UCP_AGENT_NAME="OpenClaw UCP Shopping Agent"
 ```
 
 ## Version
 
-Current package version: `0.2.3`.
+Current package version: `0.2.4`.

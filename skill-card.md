@@ -28,8 +28,8 @@ Mitigation: Collect only buyer-provided fields required by the live MCP schema, 
 Reference(s): <br>
 ClawHub Skill Page <br>
 GitHub Repository: https://github.com/theagenttimes/ucp-gateway-skill <br>
-Homepage: https://ucpgateway.theagenttimes.com/ <br>
-MCP endpoint: https://ucpgateway.theagenttimes.com/mcp <br>
+Homepage: https://ucpg.ai/ <br>
+MCP endpoint: https://ucpg.ai/mcp <br>
 README.md <br>
 SKILL.md <br>
 
@@ -40,7 +40,7 @@ Skill Output: <br>
 **Other Properties Related to Output:** [Requires python3 for optional local helper scripts; uses UCP_GATEWAY_MCP_URL, UCP_NAMESPACE, UCP_AGENT_NAME, and UCP_AGENT_DESCRIPTION as optional environment overrides; stores local helper state in ./.ucpgateway/.] <br>
 
 Skill Version(s): <br>
-0.2.3 (source: package.json and SKILL.md frontmatter) <br>
+0.2.4 (source: package.json and SKILL.md frontmatter) <br>
 
 Ethical Considerations: <br>
 Users should review all product, cart, and checkout details before relying on them. Agents must preserve buyer agency, avoid hidden purchasing, avoid payment handling, and follow applicable commerce, privacy, and platform policies before deployment. <br>

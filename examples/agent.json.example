@@ -1,14 +1,14 @@
 {
   "agent_id": "00000000-0000-4000-8000-000000000000",
   "namespace": "openclaw",
-  "profile_url": "https://ucpgateway.theagenttimes.com/agents/openclaw/00000000-0000-4000-8000-000000000000.json",
-  "registry_url": "https://ucpgateway.theagenttimes.com/registry",
-  "gateway_mcp_url": "https://ucpgateway.theagenttimes.com/mcp",
+  "profile_url": "https://ucpg.ai/agents/openclaw/00000000-0000-4000-8000-000000000000.json",
+  "registry_url": "https://ucpg.ai/registry",
+  "gateway_mcp_url": "https://ucpg.ai/mcp",
   "profile_json": {
     "ucp": {
       "version": "2026-04-08",
       "supported_versions": {
-        "2026-04-08": "https://ucpgateway.theagenttimes.com/agents/openclaw/00000000-0000-4000-8000-000000000000.json"
+        "2026-04-08": "https://ucpg.ai/agents/openclaw/00000000-0000-4000-8000-000000000000.json"
       },
       "capabilities": {
         "dev.ucp.shopping.catalog.search": [{ "version": "2026-04-08" }],
@@ -32,9 +32,9 @@
     ],
     "metadata": {
       "agent_id": "00000000-0000-4000-8000-000000000000",
-      "profile_url": "https://ucpgateway.theagenttimes.com/agents/openclaw/00000000-0000-4000-8000-000000000000.json",
-      "registry": "https://ucpgateway.theagenttimes.com",
-      "gateway": "https://ucpgateway.theagenttimes.com/mcp",
+      "profile_url": "https://ucpg.ai/agents/openclaw/00000000-0000-4000-8000-000000000000.json",
+      "registry": "https://ucpg.ai",
+      "gateway": "https://ucpg.ai/mcp",
       "name": "OpenClaw UCP Shopping Agent",
       "runtime": "openclaw",
       "skill": "ucp-gateway-skill"

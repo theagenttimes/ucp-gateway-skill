@@ -11,9 +11,9 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-DEFAULT_GATEWAY = "https://ucpgateway.theagenttimes.com/mcp"
+DEFAULT_GATEWAY = "https://ucpg.ai/mcp"
 MIN_PYTHON = (3, 8)
-PACKAGE_VERSION = "0.2.3"
+PACKAGE_VERSION = "0.2.4"
 PRIVATE_FIELDS = {"d", "p", "q", "dp", "dq", "qi", "k"}
 SCRIPT_NAME = "register_profile.py"
 
